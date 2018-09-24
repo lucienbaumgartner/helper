@@ -5,7 +5,7 @@ rm(list=ls())
 
 source('~/r-helpers/url-snowballing/url-snowballing-fx.R')
 
-cycler(start='https://www.uvek.admin.ch/uvek/de/home/uvek/abstimmungen/no-billag-initiative.html', 
+cycler(start='https://www.admin.ch/gov/de/start/dokumentation/abstimmungen/20180304/initiative-no-billag.html', 
              time.limit=60, 
              keywords='no?(-)billag')
 
