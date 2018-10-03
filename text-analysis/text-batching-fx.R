@@ -4,15 +4,19 @@ batch_text <- function(usr.text, batchsize){
   
   for(i in 1:(round(nchar(usr.text)/batchsize, 0)+20)){
     
-    container[[i]] <- fit %>% 
-      gsub('\\.\\.\\.', '\\C-x', .) %>% 
-      strsplit(., '(?:(?<=[?!.]\\«\\s)|(?<=[?!.]\\s))', perl=T) %>% 
-      unlist(., recursive = F) %>%  
-      .[length(.)] %>% 
-      paste0(., '$') %>% 
-      gsub('\\C-x', '\\.\\.\\.', .) %>%
-      gsub('*', '\\*', .) %>% 
-      gsub(., '', fit) 
+    container[[i]] <- tryCatch({fit %>% 
+        gsub('\\.\\.\\.', '\\C-x', .) %>% 
+        strsplit(., '(?:(?<=[?!.]\\«\\s)|(?<=[?!.]\\s))', perl=T) %>% 
+        unlist(., recursive = F) %>%  
+        .[length(.)] %>% 
+        paste0(., '$') %>% 
+        gsub('\\C-x', '\\.\\.\\.', .) %>%
+        gsub(., '', fit)}, error = function(e){e})
+    
+    if(grepl('error|Error', container[[i]])){
+      container <- 'batching error'
+      break
+    }
     
     if(container[[i]]=='') container[[i]] <- fit
     

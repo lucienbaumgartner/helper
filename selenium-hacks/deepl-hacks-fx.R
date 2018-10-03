@@ -1,4 +1,4 @@
-set_lang <- function(user.text, driver, language){
+set_lang <- function(user.text, driver, language = 'dynamic'){
   browser <- driver
   if(identical(language, 'dynamic')){lang <- names(tail(table(textcat(user.text)), n=1))}else{lang=language}
   
