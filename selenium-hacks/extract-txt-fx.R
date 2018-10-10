@@ -8,7 +8,6 @@ extract_txt <- function(urls, add.queries=NULL){
   pbsapply(urls, function(s.url){
     html <- getURL(s.url, followlocation = TRUE)
     
-    # parse html
     doc = htmlParse(html, asText=TRUE)
     queries <- c(title = "//title", text = "//p", add.queries)
     plain.text <- xpathSApply(doc, queries, xmlValue)
