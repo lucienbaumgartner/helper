@@ -26,7 +26,8 @@ get_google_hits <- function(google.url, raw=T, drop.recursives=F) {
   if(isTRUE(raw)){
     return(raw.refs)
     }else{
-    clean.refs <- gsub('(\\/url\\?q\\=)|(\\&sa.*)', '', raw.refs)
+    clean.refs <- gsub('(\\/url\\?q\\=)|(\\&sa.*)', '', raw.refs) %>% 
+      sapply(., function(x) URLdecode(URLdecode(x)))
     return(clean.refs)
   }
 

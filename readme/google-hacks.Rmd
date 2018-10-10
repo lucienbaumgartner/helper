@@ -45,7 +45,7 @@ search.term <- "NoBillag"
 ## specify the URL for searches:
 # quotes:: quoted search term (T/F)
 # n.pages:: number pages that should be returned; if n.pages > 1 -> additional urls are gerated for each page
-search.url <- get_search_url(search.term=search.term, quotes=F, n.pages=4)
+search.url <- get_search_url(search.term=search.term, quotes=F, n.pages=3)
 
 search.url
 
