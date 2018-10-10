@@ -515,7 +515,11 @@ hits.b &lt;- check_status_code(hits) %&gt;% print(n=100)</code></pre>
 ## 28 FALSE   https://www.nobillag-nein.ch/                                  
 ## 29 TRUE    https://www.edito.ch/dossiers/no-billag/</code></pre>
 <pre class="r"><code>## get texts
-txt &lt;- extract_txt(hits.b$url[hits.b$boolean==T], add.queries = c(h2 = '//h2', h3 = '//h3'))
+# add.queries:: add additional queries; default: //p &amp; //title
+# preproc.expr:: additional regex expressions for preprocessing
+txt &lt;- extract_txt(hits.b$url[hits.b$boolean==T], 
+                   add.queries = c(h2 = '//h2', h3 = '//h3'), 
+                   preproc.expr = '(^(\\s+)?$)|(\\\n(\\s+)?)')
 cat(txt[1])</code></pre>
 <pre><code>## «No Billag»-Initiative - 71,6 Prozent sagen Nein zur Vorlage - News - SRF
 ## «No Billag»-Initiative

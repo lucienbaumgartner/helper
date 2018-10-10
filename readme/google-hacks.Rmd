@@ -66,7 +66,11 @@ hits
 hits.b <- check_status_code(hits) %>% print(n=100)
 
 ## get texts
-txt <- extract_txt(hits.b$url[hits.b$boolean==T], add.queries = c(h2 = '//h2', h3 = '//h3'))
+# add.queries:: add additional queries; default: //p & //title
+# preproc.expr:: additional regex expressions for preprocessing
+txt <- extract_txt(hits.b$url[hits.b$boolean==T], 
+                   add.queries = c(h2 = '//h2', h3 = '//h3'), 
+                   preproc.expr = '(^(\\s+)?$)|(\\\n(\\s+)?)')
 cat(txt[1])
 ```
 
