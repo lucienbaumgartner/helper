@@ -1,4 +1,4 @@
-check_status_code <- function(hots){
+check_status_code <- function(hits){
   
   if(is.list(hits)) hits <- unlist(hits)
   
