@@ -13,7 +13,7 @@ search.term <- "NoBillag"
 ## specify the URL for searches:
 # quotes:: quoted search term (T/F)
 # n.pages:: number pages that should be returned; if n.pages > 1 -> additional urls are gerated for each page
-search.url <- get_search_url(search.term=search.term, quotes=F, n.pages=4)
+search.url <- get_search_url(search.term=search.term, quotes=F, n.pages=2)
 
 ## get hits back
 # raw:: if you want the raw url (T/F)
@@ -21,6 +21,6 @@ search.url <- get_search_url(search.term=search.term, quotes=F, n.pages=4)
 hits <- pblapply(search.url, function(x) get_google_hits(x, raw=F, drop.recursives = T))
 
 # check if they can be accessed or are dead links (is able to handle lists and vectors!)
-np <- check_status_code(hits)
+hits.b <- check_status_code(hits)
 
-print(np, n=100)
+print(hits.b, n=100)
