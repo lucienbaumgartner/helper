@@ -44,6 +44,7 @@ source('~/r-helpers/selenium-hacks/extract-txt-fx.R')
 get_search_url
 get_google_hits
 check_status_code
+extract_txt
 
 # enter search term
 search.term <- "NoBillag"

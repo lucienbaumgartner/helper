@@ -399,6 +399,22 @@ get_search_url</code></pre>
 ##         url = names(.))
 ##     return(hits.bool)
 ## }</code></pre>
+<pre class="r"><code>extract_txt</code></pre>
+<pre><code>## function (urls, add.queries = NULL, preproc.expr = NULL) 
+## {
+##     if (is.list(urls)) 
+##         url &lt;- unlist(urls)
+##     pbsapply(urls, function(s.url) {
+##         html &lt;- getURL(s.url, followlocation = TRUE)
+##         doc = htmlParse(html, asText = TRUE)
+##         queries &lt;- c(title = &quot;//title&quot;, text = &quot;//p&quot;, add.queries)
+##         plain.text &lt;- xpathSApply(doc, queries, xmlValue)
+##         plain.text &lt;- gsub(&quot;\\{.*\\}&quot;, &quot;&quot;, plain.text)
+##         if (!is.null(preproc.expr)) 
+##             plain.text &lt;- plain.text[!grepl(preproc.expr, plain.text)]
+##         return(paste(plain.text, collapse = &quot;\n&quot;))
+##     })
+## }</code></pre>
 <pre class="r"><code># enter search term
 search.term &lt;- &quot;NoBillag&quot;
 
