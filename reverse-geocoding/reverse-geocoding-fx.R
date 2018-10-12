@@ -125,10 +125,10 @@ reverse_geocode_city <- function(data, query, geo.source.coordinates = geonames.
   
   ids <- geo.source.coordinates$id[nns$nn.idx[,1:n.nearest.neighbours]]
   
-  city <- tibble(city.id=as.numeric(geo.source.full$V1[geo.source.full$V1%in%ids]),
-                 city=geo.source.full$V2[geo.source.full$V1%in%ids],
-                 city.lat=as.numeric(geo.source.full$V5[geo.source.full$V1%in%ids]),
-                 city.lng=as.numeric(geo.source.full$V6[geo.source.full$V1%in%ids])) %>% 
+  city <- tibble(city.id=as.numeric(geo.source.full$id[geo.source.full$id%in%ids]),
+                 city=geo.source.full$name[geo.source.full$id%in%ids],
+                 city.lat=as.numeric(geo.source.full$lat[geo.source.full$id%in%ids]),
+                 city.lng=as.numeric(geo.source.full$lng[geo.source.full$id%in%ids])) %>% 
     left_join(tibble(city.id=ids), ., by='city.id')
   
   df.base <- as_tibble(cbind(df.base, city))
@@ -139,3 +139,4 @@ reverse_geocode_city <- function(data, query, geo.source.coordinates = geonames.
   
   return(df)
 }
+
