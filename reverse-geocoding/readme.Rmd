@@ -48,7 +48,7 @@ source('~/r-helpers/reverse-geocoding/reverse-geocoding-fx.R')
 reverse_geocode_city
 ```
 
-The function autamtically loads the geonames dataset for cities with population > 10000 as a source for the reverse geocoding. It is possible to use another source.
+The function automatically loads the geonames dataset for cities with population > 10000 as a source for the reverse geocoding. It is also possible to use another source.
 
 The function allows to specify the following parameters:
 
