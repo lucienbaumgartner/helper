@@ -20,7 +20,7 @@ batch_text <- function(usr.text, batchsize){
     
     if(container[[i]]=='') container[[i]] <- fit
     
-    ptrn <- gsub('([[:punct:]])', '\\\\\\1', container[[i]]) %>% 
+    ptrn <- gsub('([[:punct:]])|\(', '\\\\\\1', container[[i]]) %>% 
       str_sub(., start= -30)
     
     fit <- gsub(paste0('.*', ptrn), '', usr.text) %>% 
