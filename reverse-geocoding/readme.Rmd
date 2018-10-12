@@ -61,7 +61,7 @@ The function allows to specify the following parameters:
 
 ## Functionality
 
-For all cases, in which only bounding boxes are available but no precise geo coordinates, the function (i) sets up the bounding boxes, (ii) computes the polygons, and subseuqently their (iii) centroids. Those are used then used to compute the nearest neighbours. Ultimately, the function returns the same dataframe that was fed to it, complemented with the new geoinformation. At the moment, the function only supports these new variables: `city` (name), `city.lat`, `city.lng`. The coordinates are returned for validation purposes (see below). I'll add country infomration, asap.
+For all cases, in which only bounding boxes are available but no precise geo coordinates, the function (i) sets up the bounding boxes, (ii) computes the polygons, and subsequently their (iii) centroids. Those are used then used to compute the nearest neighbours. When geo coordinates are available, they extracted and directly used to compute the nearest neighbours. If both options shall be used (like in our case), it will do both. Nearest neighbour results based on geo coordinates will always override bounding box-only results.  Ultimately, the function returns the same dataframe that was fed to it, complemented with the new geoinformation. At the moment, the function only supports these new variables: `city` (name), `city.lat`, `city.lng`. The coordinates are returned for validation purposes (see below). I'll add country infomration, asap. 
 
 In the following there is a test run with the Syria Twitter Data 2015. It shows that the python library (reverseGeocoder) and my function produce the exact same results in 98.87% of all cases. 
 
@@ -147,10 +147,11 @@ q <- ggplot(geo) +
   scale_y_continuous(limits = range(admin$lat)) +
   coord_equal() +
   scale_color_viridis(discrete = T, name='Observations') +
-  ggtitle('Distance differences of reverse geocoded cities
-          to actual geo coordinates from Twitter')
+  labs(title='Distance differences of reverse geocoded cities to actual geo coordinates from Twitter', 
+       subtitle='Only non-identical results are shown.')
 q
 
+# which function produces better results?
 geo <- pbmclapply(1:nrow(geo), function(x){
   my <- distHaversine(select(geo, geo.coord.lng, geo.coord.lat)[x,], 
                       select(geo, city.lng, city.lat)[x,])
@@ -163,6 +164,7 @@ mc.cores=4) %>%
          or=sapply(., '[[', 2)) %>% 
   mutate(better=my<or)
 
+# share of cases with non-identical results where the resulting city data from my function is nearer to the actaul geo coordinates than the python library
 table(geo$better)/nrow(geo)
 ```
 
