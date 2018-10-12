@@ -384,7 +384,7 @@ reverse_geocode_city</code></pre>
 ##                   tmp &lt;- Polygons(list(tmp), 1)
 ##                   tmp &lt;- SpatialPolygons(list(tmp))
 ##                   return(tmp)
-##                 }, mc.cores = 4)
+##                 }, mc.cores = n.cores)
 ##                 print(&quot;[STATUS] polygons: computed&quot;)
 ##                 sp.centroids &lt;- pbmclapply(sp.poly.query, gCentroid, 
 ##                   mc.cores = n.cores)

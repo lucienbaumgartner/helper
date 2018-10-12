@@ -53,7 +53,7 @@ reverse_geocode_city <- function(data, query, geo.source.coordinates = geonames.
           tmp <- Polygons(list(tmp), 1) 
           tmp <- SpatialPolygons(list(tmp))
           return(tmp)
-        }, mc.cores = 4)
+        }, mc.cores = n.cores)
         
         print('[STATUS] polygons: computed')
         
