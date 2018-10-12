@@ -61,7 +61,7 @@ The function allows to specify the following parameters:
 
 ## Functionality
 
-For all cases, in which only bounding boxes are available but no precise geo coordinates, the function (i) sets up the bounding boxes, (ii) computes the polygons, and subsequently their (iii) centroids. Those are used then used to compute the nearest neighbours. When geo coordinates are available, they extracted and directly used to compute the nearest neighbours. If both options shall be used (like in our case), it will do both. Nearest neighbour results based on geo coordinates will always override bounding box-only results.  Ultimately, the function returns the same dataframe that was fed to it, complemented with the new geoinformation. At the moment, the function only supports these new variables: `city` (name), `city.lat`, `city.lng`. The coordinates are returned for validation purposes (see below). I'll add country infomration, asap. 
+For all cases, in which only bounding boxes are available but no precise geo coordinates, the function (i) sets up the bounding boxes, (ii) computes the polygons, and subsequently their (iii) centroids. Those are used then used to compute the nearest neighbours. When geo coordinates are available, they extracted and directly used to compute the nearest neighbours. If both options shall be used (like in our case), it will do both. Nearest neighbour results based on geo coordinates will always override bounding box-only results.  Ultimately, the function returns the same dataframe that was fed to it, complemented with the new geoinformation. At the moment, the function only supports these new variables:`city.id` (geoNames), `city` (name), `city.lat`, `city.lng`. The coordinates are returned for validation purposes (see below). I'll add country infomration, asap. 
 
 In the following there is a test run with the Syria Twitter Data 2015. It shows that the python library (reverseGeocoder) and my function produce the exact same results in 98.87% of all cases. 
 
@@ -74,7 +74,7 @@ my.rec <- reverse_geocode_city(data=dfl[[2]],
                                query = 'both',
                                n.nearest.neighbours = 1)  
 
-my.rec
+head(as.data.frame(my.rec))
 
 #load initial datasets
 setwd('~/Dropbox/Twitter_Syria/data/input/')
@@ -86,6 +86,9 @@ sc.rec <- df[[1]]
 
 # join both sets together
 recs <- left_join(sc.rec %>% mutate(id=as.numeric(id)), my.rec %>% rename(newcity=city), by='id')
+
+# ex:
+tail(sort(table(recs$newcity)), 20)
 
 # preprocess the city names
 recs <- recs %>% 
@@ -147,8 +150,9 @@ q <- ggplot(geo) +
   scale_y_continuous(limits = range(admin$lat)) +
   coord_equal() +
   scale_color_viridis(discrete = T, name='Observations') +
-  labs(title='Distance differences of reverse geocoded cities to actual geo coordinates from Twitter', 
-       subtitle='Only non-identical results are shown.')
+  labs(title='Distance differences of reverse geocoded cities to actual geo coordinates
+       from Twitter', 
+       subtitle='Only unique non-identical results are shown.')
 q
 
 # which function produces better results?
