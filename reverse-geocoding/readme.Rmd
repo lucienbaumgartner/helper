@@ -1,0 +1,168 @@
+---
+title: "Custom KD-tree Based Reverse Geocoder Function in R"
+author: "Lucien Baumgartner"
+date: "10/12/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F)
+```
+```{css echo=F}
+pre code, pre, code {
+  white-space: pre !important;
+  overflow-x: scroll !important;
+  word-break: keep-all !important;
+  word-wrap: initial !important;
+}
+
+pre.html{
+  background-color:white;
+}
+
+pre.r{
+  background-color:black;
+  color:white;
+}
+```
+
+## Function
+
+```{r}
+library(geosphere)
+library(ggplot2)
+library(tidyr)
+library(rgdal)
+library(geonames)
+library(viridis)
+
+rm(list = ls())
+
+# load the new datasets (JSON-streaming)
+load('~/Twitter-SY/Twitter-SY/output/00-dataframes.RData')
+
+# source reverse-geocoding fx
+source('~/r-helpers/reverse-geocoding/reverse-geocoding-fx.R')
+
+# this is the fuunction
+reverse_geocode_city
+```
+
+The function autamtically loads the geonames dataset for cities with population > 10000 as a source for the reverse geocoding. It is possible to use another source.
+
+The function allows to specify the following parameters:
+
+- `data`
+- `query`: either only `bounding_box` data, only `geo.coord`, or `both`
+- `geo.source.coordinates`; default: geoNames data
+- `geo.source.meta`; default: geoNames data
+- `n.nearest.neighbours`: number of nearest numbers; if > 1, returned as list
+- `n.cores`: number of cores available for parallelization; default: half of total cores 
+
+## Functionality
+
+For all cases, in which only bounding boxes are available but no precise geo coordinates, the function (i) sets up the bounding boxes, (ii) computes the polygons, and subseuqently their (iii) centroids. Those are used then used to compute the nearest neighbours. Ultimately, the function returns the same dataframe that was fed to it, complemented with the new geoinformation. At the moment, the function only supports these new variables: `city` (name), `city.lat`, `city.lng`. The coordinates are returned for validation purposes (see below). I'll add country infomration, asap.
+
+In the following there is a test run with the Syria Twitter Data 2015. It shows that the python library (reverseGeocoder) and my function produce the exact same results in 98.87% of all cases. 
+
+In 68.96% of the remaining cases (those that differ), my function maps them more accurately than the python library. 
+
+## Test run
+```{r fig.align='center'}
+# compute nearest city for 2015 data
+my.rec <- reverse_geocode_city(data=dfl[[2]], 
+                               query = 'both',
+                               n.nearest.neighbours = 1)  
+
+my.rec
+
+#load initial datasets
+setwd('~/Dropbox/Twitter_Syria/data/input/')
+
+df <- lapply(grep('Location.csv', list.files(), value=T), 
+             function(x) read.csv(x, stringsAsFactors=FALSE, sep='\t')) 
+# subset for 2015 data
+sc.rec <- df[[1]]
+
+# join both sets together
+recs <- left_join(sc.rec %>% mutate(id=as.numeric(id)), my.rec %>% rename(newcity=city), by='id')
+
+# preprocess the city names
+recs <- recs %>% 
+  filter(!city_use==newcity) %>% 
+  select(city, city_use, newcity, geo.coordinates, city.lat, city.lng, geo.coord.lat, geo.coord.lng) %>% 
+  mutate(geo.coordinates=gsub('\\]|\\[|,', '', geo.coordinates)) %>%
+  separate(., geo.coordinates, c('lat', 'lng'), sep = '\\s')  %>% 
+  mutate_at(grep('lat|lng', names(.), value=T), as.numeric) %>%
+  mutate_at(grep('city', names(.), value=T), .funs = function(x) iconv(x, from = 'UTF-8', 'ASCII//TRANSLIT') %>% 
+              gsub("['`^]", '', .) %>% 
+              gsub('["]', '', .)) %>% 
+  as_tibble %>% 
+  na.omit %>% 
+  mutate(newcity=recode(newcity, 
+                        Qadsayya='Qadsiya',
+                        Kafranbel='Kafr Nubl',
+                        Bdama='Badama',
+                        Mismiyah='Al Mismiyah',
+                        'Ad Duraykish'='Duraykish',
+                        Fukuoka='Fukuoka-shi'
+  ))
+
+# subset the cases where the city info differs
+recs.s <- recs %>% 
+  filter(!(city==newcity|city=="")) 
+
+# share of identical results:
+1-(nrow(recs.s)/nrow(recs))
+
+options(geonamesUsername="dtalab")
+
+# get the coordinates for the cities already coded in the data to match it to the coordinates I reverse geocoded
+gloc <- pbmclapply(unique(recs.s$city), function(x){
+  temp <- tryCatch(GNsearch(name=x) %>% mutate(locs=x) , error=function(err) NA)
+  return(temp)}, mc.cores = 2) %>% 
+  do.call(rbind, .)
+
+geo <- gloc %>% 
+  filter(!duplicated(locs)) %>% 
+  select(gn.lat=lat, gn.lng=lng, city=locs) 
+
+geo <- left_join(recs.s, geo, by='city') %>% 
+  mutate_at(grep('lat|lng', names(.), value=T), .funs=as.numeric) %>% 
+  unique
+
+# plot
+setwd('~/Twitter-SY/Twitter-SY/input/syr_admin_shp_utf8_180131/')
+admin <- readOGR('.','syr_admin2') 
+admin <- fortify(admin)
+
+q <- ggplot(geo) +
+  geom_polygon(data=admin, aes(long, lat, group=group), fill='darkgrey', color='white') +
+  geom_point(aes(geo.coord.lng, geo.coord.lat, color='Twitter coordinates'), alpha=0.5) +
+  geom_point(aes(city.lng, city.lat, color='My geocoder function'), alpha=0.5) +
+  geom_point(aes(gn.lng, gn.lat, color='Python geocoder function'), alpha=0.5) +
+  theme_void() +
+  theme(plot.title = element_text(face='bold')) +
+  scale_x_continuous(limits = range(admin$long)) +
+  scale_y_continuous(limits = range(admin$lat)) +
+  coord_equal() +
+  scale_color_viridis(discrete = T, name='Observations') +
+  ggtitle('Distance differences of reverse geocoded cities
+          to actual geo coordinates from Twitter')
+q
+
+geo <- pbmclapply(1:nrow(geo), function(x){
+  my <- distHaversine(select(geo, geo.coord.lng, geo.coord.lat)[x,], 
+                      select(geo, city.lng, city.lat)[x,])
+  or <- distHaversine(select(geo, geo.coord.lng, geo.coord.lat)[x,], 
+                      select(geo, gn.lng, gn.lat)[x,])
+  return(list(my, or))
+}, 
+mc.cores=4) %>% 
+  tibble(my=sapply(., '[[', 1),
+         or=sapply(., '[[', 2)) %>% 
+  mutate(better=my<or)
+
+table(geo$better)/nrow(geo)
+```
+
