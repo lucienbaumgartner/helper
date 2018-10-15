@@ -28,6 +28,12 @@ theme_void <- function(grid='major', grid.color='lightgrey', title.spacing=0, su
       panel.grid.minor = element_line(color = grid.color)
     )
   }
+  if(identical(grid, 'both')){
+    thm <- thm + theme(
+      panel.grid.major = element_line(color = grid.color),
+      panel.grid.minor = element_line(color = grid.color)
+    )
+  }
   if(identical(grid, 'none')){
     thm <- thm + theme(
       panel.grid.major = element_blank(),
