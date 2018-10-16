@@ -86,3 +86,80 @@ txt.clean[[6]] %>% print(n=500)
 # all the deleted elements 
 unlist(sapply(1:length(txt),function(x) txt[[x]][!txt[[x]]%in%txt.clean[[x]]$txt]))
 
+
+parameters <- expand.grid(scnd.step.slicing=1:5, 
+                          scnd.step.threshold=10:30, 
+                          min.words=1:6, 
+                          min.avg.characters=1:10, 
+                          max.buzzwords=1:8)
+buzzwords <- c('bild',
+               'video',
+               'kontakt', 
+               'links',
+               '(\\&)',
+               'registrier',
+               'vielen dank',
+               'wir wünschen ihnen',
+               'nzz', 
+               'blick',
+               'anmeld',
+               'passwort',
+               'alle rechte',
+               'medienwoche',
+               '([0-9]{5,})',
+               '(\\|)')
+benchmarking <- lapply(txt, function(txt){
+  temp <- mapply(function(scnd.step.slicing, scnd.step.threshold, min.words, min.avg.characters, max.buzzwords){
+    temp <- clean_text(txt=txt[[1]], 
+                       buzzwords = buzzwords, 
+                       slicing = T,
+                       slicing.keywords = NULL,
+                       scnd.step.slicing = scnd.step.slicing,
+                       scnd.step.threshold = scnd.step.threshold,
+                       min.words = min.words,
+                       min.avg.characters = min.avg.characters,
+                       max.buzzwords = max.buzzwords
+    )
+    
+    return(tibble(avg.nchars = mean(sapply(tmp, sum(nchar, nr.rm = T))),
+           p.identical = txt[!txt%in%tmp$txt]/nrow(txt)))
+  }, scnd.step.slicing=parameters$scnd.step.slicing, list(scnd.step.threshold=parameters$scnd.step.threshold,
+                   min.words=parameters$min.words,
+                   min.avg.characters=parameters$min.avg.characters,
+                   max.buzzwords=parameters$max.buzzwords))
+  return(temp)
+})
+
+
+avg <- pbmclapply(1:length(txt), function(indx){
+  temp <- lapply(1:nrow(parameters), function(x){
+    clean_text(txt=txt[[indx]], 
+               buzzwords = buzzwords, 
+               slicing = T,
+               slicing.keywords = NULL,
+               scnd.step.slicing=parameters$scnd.step.slicing[x],
+               scnd.step.threshold=parameters$scnd.step.threshold[x],
+               min.words=parameters$min.words[x],
+               min.avg.characters=parameters$min.avg.characters[x],
+               max.buzzwords=parameters$max.buzzwords[x]
+    )
+    
+  })}, 
+  mc.cores = 5)
+  
+benchmarking.avg <- lapply(1:length(txt), function(indx){
+  print(indx)
+  avg <- pbmclapply(1:length(temp[[1]]), function(y){
+           tibble(
+               avg.nchars = mean(sapply(temp[[indx]][[y]]$txt, function(x) sum(nchar(x), nr.rm = T))),
+               p.identical = length(txt[[indx]][!txt[[indx]]%in%temp[[indx]][[y]]$txt])/nrow(txt[[indx]])
+             )
+         }, mc.cores = 5) %>% 
+           do.call(rbind, .)
+     })
+avg[[1]]
+       p.identical = sapply(txt[[1]][!txt[[1]]%in%tmp$txt]/nrow(txt[[1]])))
+       
+benchmarking[[1]]
+avg <- pbmclapply(1:length(temp), function(y) mean(sapply(temp[[y]], function(x) sum(nchar(x), nr.rm = T)), na.rm = T), mc.cores = 5)
+
