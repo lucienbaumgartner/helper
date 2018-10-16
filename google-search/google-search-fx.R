@@ -1,10 +1,10 @@
 
-get_search_url <- function(search.term, domain = '.ch', quotes=TRUE, n.pages=1){
+get_search_url <- function(search.term, language = 'de',  domain = '.ch', quotes=TRUE, n.pages=1){
   search.term <- gsub(' ', '%20', search.term)
   
   if(isTRUE(quotes)) search.term <- paste('%22', search.term, '%22', sep='') 
   
-  google.url <- paste('http://www.google', domain, '/search?q=',
+  google.url <- paste('http://www.google', domain, '/search?','hl=', language,'&q=',
                         search.term, sep='')
   
   if(n.pages>1){

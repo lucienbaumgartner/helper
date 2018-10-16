@@ -1,6 +1,7 @@
 library(XML)
 library(RCurl)
 library(pbapply)
+library(dplyr)
 
 rm(list=ls())
 
@@ -13,7 +14,7 @@ search.term <- "NoBillag"
 ## specify the URL for searches:
 # quotes:: quoted search term (T/F)
 # n.pages:: number pages that should be returned; if n.pages > 1 -> additional urls are gerated for each page
-search.url <- get_search_url(search.term=search.term, quotes=F, n.pages=2)
+search.url <- get_search_url(search.term=search.term, language = 'it', quotes=F, n.pages=2)
 
 ## get hits back
 # raw:: if you want the raw url (T/F)
