@@ -356,13 +356,14 @@ source('~/r-helpers/selenium-hacks/extract-txt-fx.R')
 
 ### custom functions
 get_search_url</code></pre>
-<pre><code>## function (search.term, domain = &quot;.ch&quot;, quotes = TRUE, n.pages = 1) 
+<pre><code>## function (search.term, language = &quot;de&quot;, domain = &quot;.ch&quot;, quotes = TRUE, 
+##     n.pages = 1) 
 ## {
 ##     search.term &lt;- gsub(&quot; &quot;, &quot;%20&quot;, search.term)
 ##     if (isTRUE(quotes)) 
 ##         search.term &lt;- paste(&quot;%22&quot;, search.term, &quot;%22&quot;, sep = &quot;&quot;)
-##     google.url &lt;- paste(&quot;http://www.google&quot;, domain, &quot;/search?q=&quot;, 
-##         search.term, sep = &quot;&quot;)
+##     google.url &lt;- paste(&quot;http://www.google&quot;, domain, &quot;/search?&quot;, 
+##         &quot;hl=&quot;, language, &quot;&amp;q=&quot;, search.term, sep = &quot;&quot;)
 ##     if (n.pages &gt; 1) {
 ##         return(c(google.url, paste0(google.url, &quot;&amp;ei=q-W9W-2MBoTCwALs5aPwBg&amp;start=&quot;, 
 ##             (1:(n.pages - 1)) * 10, &quot;&amp;sa=N&quot;)))
@@ -421,12 +422,13 @@ search.term &lt;- &quot;NoBillag&quot;
 ## specify the URL for searches:
 # quotes:: quoted search term (T/F)
 # n.pages:: number pages that should be returned; if n.pages &gt; 1 -&gt; additional urls are gerated for each page
-search.url &lt;- get_search_url(search.term=search.term, quotes=F, n.pages=3)
+# language:: default=='de'
+search.url &lt;- get_search_url(search.term=search.term, language='fr', quotes=F, n.pages=3)
 
 search.url</code></pre>
-<pre><code>## [1] &quot;http://www.google.ch/search?q=NoBillag&quot;                                        
-## [2] &quot;http://www.google.ch/search?q=NoBillag&amp;ei=q-W9W-2MBoTCwALs5aPwBg&amp;start=10&amp;sa=N&quot;
-## [3] &quot;http://www.google.ch/search?q=NoBillag&amp;ei=q-W9W-2MBoTCwALs5aPwBg&amp;start=20&amp;sa=N&quot;</code></pre>
+<pre><code>## [1] &quot;http://www.google.ch/search?hl=fr&amp;q=NoBillag&quot;                                        
+## [2] &quot;http://www.google.ch/search?hl=fr&amp;q=NoBillag&amp;ei=q-W9W-2MBoTCwALs5aPwBg&amp;start=10&amp;sa=N&quot;
+## [3] &quot;http://www.google.ch/search?hl=fr&amp;q=NoBillag&amp;ei=q-W9W-2MBoTCwALs5aPwBg&amp;start=20&amp;sa=N&quot;</code></pre>
 <pre class="r"><code>## get hits back
 # raw:: if you want the raw url (T/F)
 # drop.recursive:: if you want to drop results from picture result suggestions etc. (T/F)
@@ -434,102 +436,105 @@ hits &lt;- pblapply(search.url, function(x) get_google_hits(x, raw=F, drop.recur
 
 hits</code></pre>
 <pre><code>## [[1]]
-##                                                                                                                          https://nobillag.ch/ 
-##                                                                                                                        &quot;https://nobillag.ch/&quot; 
-##       https://www.srf.ch/news/schweiz/abstimmungen/abstimmungen/no-billag-initiative/no-billag-initiative-71-6-prozent-sagen-nein-zur-vorlage 
-##     &quot;https://www.srf.ch/news/schweiz/abstimmungen/abstimmungen/no-billag-initiative/no-billag-initiative-71-6-prozent-sagen-nein-zur-vorlage&quot; 
-##                                                                                                      https://twitter.com/nobillag%3Flang%3Dde 
-##                                                                                                        &quot;https://twitter.com/nobillag?lang=de&quot; 
-##                                               https://www.zeit.de/kultur/film/2018-03/no-billag-schweiz-volksabstimmung-rundfunkgebuehren-srg 
-##                                             &quot;https://www.zeit.de/kultur/film/2018-03/no-billag-schweiz-volksabstimmung-rundfunkgebuehren-srg&quot; 
-##                                                                https://www.nzz.ch/schweiz/die-no-billag-initiative-auf-einen-blick-ld.1328771 
-##                                                              &quot;https://www.nzz.ch/schweiz/die-no-billag-initiative-auf-einen-blick-ld.1328771&quot; 
-##                                                         https://www.nzz.ch/schweiz/no-billag-initative-alle-ergebnisse-im-liveblog-ld.1358585 
-##                                                       &quot;https://www.nzz.ch/schweiz/no-billag-initative-alle-ergebnisse-im-liveblog-ld.1358585&quot; 
-##   https://www.admin.ch/gov/de/start/dokumentation/abstimmungen/20180304/volksinitiative--ja-zur-abschaffung-der-radio--und-fernsehgebueh.html 
-## &quot;https://www.admin.ch/gov/de/start/dokumentation/abstimmungen/20180304/volksinitiative--ja-zur-abschaffung-der-radio--und-fernsehgebueh.html&quot; 
-##                                                            https://www.uvek.admin.ch/uvek/de/home/uvek/abstimmungen/no-billag-initiative.html 
-##                                                          &quot;https://www.uvek.admin.ch/uvek/de/home/uvek/abstimmungen/no-billag-initiative.html&quot; 
-##                                                                                                                        https://nonobillag.ch/ 
-##                                                                                                                      &quot;https://nonobillag.ch/&quot; 
-##                                                                                                                 https://sendeschluss-nein.ch/ 
-##                                                                                                               &quot;https://sendeschluss-nein.ch/&quot; 
+##                                                                                                                                                            https://nobillag.ch/fr/ 
+##                                                                                                                                                          &quot;https://nobillag.ch/fr/&quot; 
+##                                                                                                                              https://www.letemps.ch/dossiers/controverse-no-billag 
+##                                                                                                                            &quot;https://www.letemps.ch/dossiers/controverse-no-billag&quot; 
+##                                                                   https://www.rts.ch/info/suisse/9382028-no-billag-et-regime-financier-les-resultats-des-votations-par-canton.html 
+##                                                                 &quot;https://www.rts.ch/info/suisse/9382028-no-billag-et-regime-financier-les-resultats-des-votations-par-canton.html&quot; 
+##                                                            https://www.rts.ch/info/suisse/9369452-l-initiative-no-billag-est-rejetee-par-71-6-des-votants-et-tous-les-cantons.html 
+##                                                          &quot;https://www.rts.ch/info/suisse/9369452-l-initiative-no-billag-est-rejetee-par-71-6-des-votants-et-tous-les-cantons.html&quot; 
+##                                https://www.liberation.fr/planete/2018/03/05/no-billag-les-suisses-ont-compris-ce-qu-ils-perdraient-sans-le-service-public-de-l-audiovisuel_1633733 
+##                              &quot;https://www.liberation.fr/planete/2018/03/05/no-billag-les-suisses-ont-compris-ce-qu-ils-perdraient-sans-le-service-public-de-l-audiovisuel_1633733&quot; 
+##                                                                                                       https://www.24heures.ch/suisse/sondage-predit-echec-no-billag/story/17750758 
+##                                                                                                     &quot;https://www.24heures.ch/suisse/sondage-predit-echec-no-billag/story/17750758&quot; 
+##                                         https://www.admin.ch/gov/fr/accueil/documentation/votations/20180304/volksinitiative--ja-zur-abschaffung-der-radio--und-fernsehgebueh.html 
+##                                       &quot;https://www.admin.ch/gov/fr/accueil/documentation/votations/20180304/volksinitiative--ja-zur-abschaffung-der-radio--und-fernsehgebueh.html&quot; 
+##                                                                                                                                   https://www.bk.admin.ch/ch/f/pore/vi/vis454.html 
+##                                                                                                                                 &quot;https://www.bk.admin.ch/ch/f/pore/vi/vis454.html&quot; 
+## https://www.swissinfo.ch/fre/politique/votations-f%25C3%25A9d%25C3%25A9rales-du-4-mars-2018_initiative-no-billag--quels-buts-et-quelles-r%25C3%25A9percussions-possibles-/43816370 
+##                          &quot;https://www.swissinfo.ch/fre/politique/votations-fédérales-du-4-mars-2018_initiative-no-billag--quels-buts-et-quelles-répercussions-possibles-/43816370&quot; 
+##                                                                                                      https://www.tdg.ch/suisse/initiative-no-billag-devrait-rejetee/story/20101524 
+##                                                                                                    &quot;https://www.tdg.ch/suisse/initiative-no-billag-devrait-rejetee/story/20101524&quot; 
 ## 
 ## [[2]]
-##                                                                                                                        https://no-culture.ch/ 
-##                                                                                                                      &quot;https://no-culture.ch/&quot; 
-##                             https://www.blick.ch/news/politik/nein-zur-no-billag-initiative-die-abstimmungsresultate-im-ticker-id8063841.html 
-##                           &quot;https://www.blick.ch/news/politik/nein-zur-no-billag-initiative-die-abstimmungsresultate-im-ticker-id8063841.html&quot; 
-##   https://www.blick.ch/news/politik/abstimmungen/das-muessen-sie-vor-dem-4-maerz-wissen-die-no-billag-initiative-kurz-erklaert-id7822810.html 
-## &quot;https://www.blick.ch/news/politik/abstimmungen/das-muessen-sie-vor-dem-4-maerz-wissen-die-no-billag-initiative-kurz-erklaert-id7822810.html&quot; 
-##     https://www.swissinfo.ch/ger/politik/abstimmung-vom-4--maerz_mehrheit-der-schweizer-stimmbuerger-lehnt--no-billag--initiative-ab/43944232 
-##   &quot;https://www.swissinfo.ch/ger/politik/abstimmung-vom-4--maerz_mehrheit-der-schweizer-stimmbuerger-lehnt--no-billag--initiative-ab/43944232&quot; 
-##                                                                                                          https://www.cvp.ch/de/NeinzuNoBillag 
-##                                                                                                        &quot;https://www.cvp.ch/de/NeinzuNoBillag&quot; 
-##         https://www.aargauerzeitung.ch/schweiz/no-billag-der-abstimmungskampf-war-so-emotional-und-multimedial-wie-kaum-einer-zuvor-132262022 
-##       &quot;https://www.aargauerzeitung.ch/schweiz/no-billag-der-abstimmungskampf-war-so-emotional-und-multimedial-wie-kaum-einer-zuvor-132262022&quot; 
-##                                                                                                                https://www.woz.ch/d/no-billag 
-##                                                                                                              &quot;https://www.woz.ch/d/no-billag&quot; 
-##                                                                                                       https://winterthur.nein-zu-nobillag.ch/ 
-##                                                                                                     &quot;https://winterthur.nein-zu-nobillag.ch/&quot; 
-##                                             https://www.20min.ch/schweiz/news/story/No-Billag-Initiative-Abstimmungen-live-Resultate-12508155 
-##                                           &quot;https://www.20min.ch/schweiz/news/story/No-Billag-Initiative-Abstimmungen-live-Resultate-12508155&quot; 
-##                                                                                                         https://medienwoche.ch/tag/no-billag/ 
-##                                                                                                       &quot;https://medienwoche.ch/tag/no-billag/&quot; 
+##                                          http://www.bilan.ch/economie-plus-de-redaction/suisses-rejettent-no-billag-veulent-medias-publics 
+##                                        &quot;http://www.bilan.ch/economie-plus-de-redaction/suisses-rejettent-no-billag-veulent-medias-publics&quot; 
+##                                                                       https://www.lematin.ch/suisse/no-billag-c-toujours-60/story/31439727 
+##                                                                     &quot;https://www.lematin.ch/suisse/no-billag-c-toujours-60/story/31439727&quot; 
+##                                                                                                                  https://fr.no-culture.ch/ 
+##                                                                                                                &quot;https://fr.no-culture.ch/&quot; 
+##                                                                https://non-nobillag.ch/wp-content/uploads/2017/12/brochure_nonnobillag.pdf 
+##                                                              &quot;https://non-nobillag.ch/wp-content/uploads/2017/12/brochure_nonnobillag.pdf&quot; 
+##                                    https://www.20min.ch/ro/news/suisse/story/-No-Billag---les-resultats-par-canton-27435834%3Fhttpredirect 
+##                                    &quot;https://www.20min.ch/ro/news/suisse/story/-No-Billag---les-resultats-par-canton-27435834?httpredirect&quot; 
+##   https://www.udc.ch/parti/publikationen/journal-du-parti/2018-2/franc-parler-janvier-2018/pourquoi-je-soutiens-no-billag-avec-conviction/ 
+## &quot;https://www.udc.ch/parti/publikationen/journal-du-parti/2018-2/franc-parler-janvier-2018/pourquoi-je-soutiens-no-billag-avec-conviction/&quot; 
+##                                                                                                   https://www.cvp.ch/fr/taxonomy/term/4891 
+##                                                                                                 &quot;https://www.cvp.ch/fr/taxonomy/term/4891&quot; 
+##                                                                             https://slashmedia.ch/no-billag%25E2%2580%25AF-essentiel-bref/ 
+##                                                                                         &quot;https://slashmedia.ch/no-billag -essentiel-bref/&quot; 
+##                                                                                                 http://wp.unil.ch/tvelargie/tag/no-billag/ 
+##                                                                                               &quot;http://wp.unil.ch/tvelargie/tag/no-billag/&quot; 
+##                                    http://www.e-gestion.ch/les-enjeux-de-linitiative-no-billag-notre-revue-de-presse-pour-mieux-comprendre 
+##                                  &quot;http://www.e-gestion.ch/les-enjeux-de-linitiative-no-billag-notre-revue-de-presse-pour-mieux-comprendre&quot; 
 ## 
 ## [[3]]
-##                                                                                                                                                                 https://www.watson.ch/NoBillag/ 
-##                                                                                                                                                               &quot;https://www.watson.ch/NoBillag/&quot; 
-## https://de.wikipedia.org/wiki/Eidgen%25C3%25B6ssische_Volksinitiative_%25C2%25ABJa_zur_Abschaffung_der_Radio-_und_Fernsehgeb%25C3%25BChren_(Abschaffung_der_Billag-Geb%25C3%25BChren)%25C2%25BB 
-##                                            &quot;https://de.wikipedia.org/wiki/Eidgenössische_Volksinitiative_«Ja_zur_Abschaffung_der_Radio-_und_Fernsehgebühren_(Abschaffung_der_Billag-Gebühren)»&quot; 
-##                                                                          https://www.tagesanzeiger.ch/schweiz/standard/Nach-NoBillagNein-SRG-verzichtet-auf-Unterbrecherwerbung-/story/14350333 
-##                                                                        &quot;https://www.tagesanzeiger.ch/schweiz/standard/Nach-NoBillagNein-SRG-verzichtet-auf-Unterbrecherwerbung-/story/14350333&quot; 
-##                                                                                                                     https://www.sp-ps.ch/de/wie-no-billag-unsere-verfassung-wirklich-veraendert 
-##                                                                                                                   &quot;https://www.sp-ps.ch/de/wie-no-billag-unsere-verfassung-wirklich-veraendert&quot; 
-##                                                                                                      https://tageswoche.ch/form/kommentar/volk-beerdigt-no-billag-buergerliche-wursteln-weiter/ 
-##                                                                                                    &quot;https://tageswoche.ch/form/kommentar/volk-beerdigt-no-billag-buergerliche-wursteln-weiter/&quot; 
-##                                                                                                                                                   http://3fach.ch/main-story/no-billag-no-3fach 
-##                                                                                                                                                 &quot;http://3fach.ch/main-story/no-billag-no-3fach&quot; 
-##                                                                                                         https://www.students.ch/magazin/details/76206/Die-No-Billag-Initiative-einfach-erklaert 
-##                                                                                                       &quot;https://www.students.ch/magazin/details/76206/Die-No-Billag-Initiative-einfach-erklaert&quot; 
-##                                                                                                                                                                   https://www.nobillag-nein.ch/ 
-##                                                                                                                                                                 &quot;https://www.nobillag-nein.ch/&quot; 
-##                                                                                                                                                        https://www.edito.ch/dossiers/no-billag/ 
-##                                                                                                                                                      &quot;https://www.edito.ch/dossiers/no-billag/&quot;</code></pre>
+##                                                                                                                              http://canal9.ch/tag/no-billag/ 
+##                                                                                                                            &quot;http://canal9.ch/tag/no-billag/&quot; 
+##                                                                                                               http://www.journaldujura.ch/dossiers/no-billag 
+##                                                                                                             &quot;http://www.journaldujura.ch/dossiers/no-billag&quot; 
+##                                                                                                                    https://lesobservateurs.ch/tag/no-billag/ 
+##                                                                                                                  &quot;https://lesobservateurs.ch/tag/no-billag/&quot; 
+##                                                                                   https://www.uss.ch/actuel/kampagnenseiten-ohne-navigation/non-a-no-billag/ 
+##                                                                                 &quot;https://www.uss.ch/actuel/kampagnenseiten-ohne-navigation/non-a-no-billag/&quot; 
+##   http://www.lenouvelliste.ch/dossiers/votations-federales-du-4-mars-2018/articles/sondages-la-tendance-au-rejet-de-l-initiative-nobillag-se-renforce-738069 
+## &quot;http://www.lenouvelliste.ch/dossiers/votations-federales-du-4-mars-2018/articles/sondages-la-tendance-au-rejet-de-l-initiative-nobillag-se-renforce-738069&quot; 
+##              http://www.arcinfo.ch/dossiers/votations-federales-du-4-mars-2018/articles/no-billag-une-majorite-des-suisses-rejetteraient-l-initiative-730194 
+##            &quot;http://www.arcinfo.ch/dossiers/votations-federales-du-4-mars-2018/articles/no-billag-une-majorite-des-suisses-rejetteraient-l-initiative-730194&quot; 
+##                                                                                               https://www.unige.ch/actualites/archives/2018/debat-no-billag/ 
+##                                                                                             &quot;https://www.unige.ch/actualites/archives/2018/debat-no-billag/&quot; 
+##                                                                                                           https://www.sgb-fss.ch/fr/action-contre-no-billag/ 
+##                                                                                                         &quot;https://www.sgb-fss.ch/fr/action-contre-no-billag/&quot; 
+##                                                                                                        https://lecourrier.ch/2018/01/16/le-mirage-no-billag/ 
+##                                                                                                      &quot;https://lecourrier.ch/2018/01/16/le-mirage-no-billag/&quot; 
+##                                                                         https://www.visionsdureel.ch/article/conference-des-festivals-non-a-no-billag-350962 
+##                                                                       &quot;https://www.visionsdureel.ch/article/conference-des-festivals-non-a-no-billag-350962&quot;</code></pre>
 <pre class="r"><code># check if they can be accessed or are dead links (is able to handle lists and vectors!)
 hits.b &lt;- check_status_code(hits) %&gt;% print(n=100)</code></pre>
-<pre><code>## # A tibble: 29 x 2
+<pre><code>## # A tibble: 30 x 2
 ##    boolean url                                                            
 ##    &lt;lgl&gt;   &lt;chr&gt;                                                          
-##  1 FALSE   https://nobillag.ch/                                           
-##  2 TRUE    https://www.srf.ch/news/schweiz/abstimmungen/abstimmungen/no-b…
-##  3 TRUE    https://twitter.com/nobillag%3Flang%3Dde                       
-##  4 TRUE    https://www.zeit.de/kultur/film/2018-03/no-billag-schweiz-volk…
-##  5 TRUE    https://www.nzz.ch/schweiz/die-no-billag-initiative-auf-einen-…
-##  6 TRUE    https://www.nzz.ch/schweiz/no-billag-initative-alle-ergebnisse…
-##  7 TRUE    https://www.admin.ch/gov/de/start/dokumentation/abstimmungen/2…
-##  8 TRUE    https://www.uvek.admin.ch/uvek/de/home/uvek/abstimmungen/no-bi…
-##  9 TRUE    https://nonobillag.ch/                                         
-## 10 TRUE    https://sendeschluss-nein.ch/                                  
-## 11 TRUE    https://no-culture.ch/                                         
-## 12 TRUE    https://www.blick.ch/news/politik/nein-zur-no-billag-initiativ…
-## 13 TRUE    https://www.blick.ch/news/politik/abstimmungen/das-muessen-sie…
-## 14 TRUE    https://www.swissinfo.ch/ger/politik/abstimmung-vom-4--maerz_m…
-## 15 TRUE    https://www.cvp.ch/de/NeinzuNoBillag                           
-## 16 TRUE    https://www.aargauerzeitung.ch/schweiz/no-billag-der-abstimmun…
-## 17 TRUE    https://www.woz.ch/d/no-billag                                 
-## 18 TRUE    https://winterthur.nein-zu-nobillag.ch/                        
-## 19 TRUE    https://www.20min.ch/schweiz/news/story/No-Billag-Initiative-A…
-## 20 TRUE    https://medienwoche.ch/tag/no-billag/                          
-## 21 TRUE    https://www.watson.ch/NoBillag/                                
-## 22 TRUE    https://de.wikipedia.org/wiki/Eidgen%25C3%25B6ssische_Volksini…
-## 23 TRUE    https://www.tagesanzeiger.ch/schweiz/standard/Nach-NoBillagNei…
-## 24 TRUE    https://www.sp-ps.ch/de/wie-no-billag-unsere-verfassung-wirkli…
-## 25 TRUE    https://tageswoche.ch/form/kommentar/volk-beerdigt-no-billag-b…
-## 26 TRUE    http://3fach.ch/main-story/no-billag-no-3fach                  
-## 27 TRUE    https://www.students.ch/magazin/details/76206/Die-No-Billag-In…
-## 28 FALSE   https://www.nobillag-nein.ch/                                  
-## 29 TRUE    https://www.edito.ch/dossiers/no-billag/</code></pre>
+##  1 FALSE   https://nobillag.ch/fr/                                        
+##  2 TRUE    https://www.letemps.ch/dossiers/controverse-no-billag          
+##  3 FALSE   https://www.rts.ch/info/suisse/9382028-no-billag-et-regime-fin…
+##  4 FALSE   https://www.rts.ch/info/suisse/9369452-l-initiative-no-billag-…
+##  5 TRUE    https://www.liberation.fr/planete/2018/03/05/no-billag-les-sui…
+##  6 TRUE    https://www.24heures.ch/suisse/sondage-predit-echec-no-billag/…
+##  7 TRUE    https://www.admin.ch/gov/fr/accueil/documentation/votations/20…
+##  8 TRUE    https://www.bk.admin.ch/ch/f/pore/vi/vis454.html               
+##  9 FALSE   https://www.swissinfo.ch/fre/politique/votations-f%25C3%25A9d%…
+## 10 TRUE    https://www.tdg.ch/suisse/initiative-no-billag-devrait-rejetee…
+## 11 TRUE    http://www.bilan.ch/economie-plus-de-redaction/suisses-rejette…
+## 12 TRUE    https://www.lematin.ch/suisse/no-billag-c-toujours-60/story/31…
+## 13 TRUE    https://fr.no-culture.ch/                                      
+## 14 FALSE   https://non-nobillag.ch/wp-content/uploads/2017/12/brochure_no…
+## 15 TRUE    https://www.20min.ch/ro/news/suisse/story/-No-Billag---les-res…
+## 16 TRUE    https://www.udc.ch/parti/publikationen/journal-du-parti/2018-2…
+## 17 TRUE    https://www.cvp.ch/fr/taxonomy/term/4891                       
+## 18 FALSE   https://slashmedia.ch/no-billag%25E2%2580%25AF-essentiel-bref/ 
+## 19 TRUE    http://wp.unil.ch/tvelargie/tag/no-billag/                     
+## 20 TRUE    http://www.e-gestion.ch/les-enjeux-de-linitiative-no-billag-no…
+## 21 TRUE    http://canal9.ch/tag/no-billag/                                
+## 22 TRUE    http://www.journaldujura.ch/dossiers/no-billag                 
+## 23 TRUE    https://lesobservateurs.ch/tag/no-billag/                      
+## 24 TRUE    https://www.uss.ch/actuel/kampagnenseiten-ohne-navigation/non-…
+## 25 TRUE    http://www.lenouvelliste.ch/dossiers/votations-federales-du-4-…
+## 26 TRUE    http://www.arcinfo.ch/dossiers/votations-federales-du-4-mars-2…
+## 27 TRUE    https://www.unige.ch/actualites/archives/2018/debat-no-billag/ 
+## 28 TRUE    https://www.sgb-fss.ch/fr/action-contre-no-billag/             
+## 29 TRUE    https://lecourrier.ch/2018/01/16/le-mirage-no-billag/          
+## 30 TRUE    https://www.visionsdureel.ch/article/conference-des-festivals-…</code></pre>
 <pre class="r"><code>## get texts
 # add.queries:: add additional queries; default: //p &amp; //title
 # preproc.expr:: additional regex expressions for preprocessing
@@ -537,135 +542,9 @@ txt &lt;- extract_txt(hits.b$url[hits.b$boolean==T],
                    add.queries = c(h2 = '//h2', h3 = '//h3'), 
                    preproc.expr = '(^(\\s+)?$)|(\\\n(\\s+)?)')
 cat(txt[1])</code></pre>
-<pre><code>## «No Billag»-Initiative - 71,6 Prozent sagen Nein zur Vorlage - News - SRF
-## «No Billag»-Initiative
-##                     Eidg. Vorlage: Volksinitiative «Ja zur Abschaffung der Radio- und Fernsehgebühren»
-## JA
-## NEIN
-## Standesstimmen
-## JA-Anteil in %
-## JA
-## NEIN
-## 2'098'139 Personen stimmten Nein, 833'630 nahmen die Initiative an. In der Romandie wurde das Volksbegehren am deutlichsten abgelehnt. Den höchsten Nein-Stimmen-Anteil verzeichnete der Kanton Neuenburg mit 78,3 Prozent, gefolgt von den Kantonen Jura (78,1), Freiburg (77,6), Graubünden (77,2) und Waadt (76,5).
-## Eher überraschend deutlich scheiterte die Vorlage im Tessin. Das RSI gilt seit jeher als Zankapfel. 65,51 der Stimmenden lehnten die Vorlage jedoch ab.
-## Die höchste Zustimmung für «No Billag» gab es im Kanton Schwyz mit 37,6 Prozent und Schaffhausen mit 37,3 Prozent.
-## Bundesamt für Statistik (BFS)
-## Kantons- und Bezirksergebnisse - kartographisch visualisiert, hier im Detail, Link öffnet in einem neuen Fenster.
-## Hohe Stimmbeteiligung
-## Die Vorlage lockte mit rund 54 Prozent überdurchschnittlich viele Stimmberechtigte an die Urne. Am höchsten war die Stimmbeteiligung wie üblich im Kanton Schaffhausen, dem Kanton mit dem faktischen Stimmzwang. 68,4 Prozent der Stimmberechtigten beteiligten sich dort an der Abstimmung über die «No Billag»-Initiative.
-## 54,4 Prozent schweizweit
-## Hohe Stimmbeteiligung wegen «No Billag»-Initiative
-## «Direkte Demokratie hat gut funktioniert»
-## Für den Politologen Lukas Golder hat am heutigen Abstimmungstag der Politmotor der direkten Demokratie rund funktioniert. Das grosse Behördenvertrauen und die Zustimmung zu den Institutionen sei bestätigt worden.
-## «Eigentlich hat man einen prototypischen Verlauf für Inititativen erlebt. Man sagt ja, Initiativen bewirken etwas, auch wenn sie abgelehnt werden», sagt Golder. Die Initiative sei ein Ventil, um ein Thema, das man sonst nicht so intensiv diskutiert hätte, aufs Tapet zu bringen. «Die Luft ist von aussen ins System hineingekommen, die SRG hat sich bewegt», fasst Golder zusammen.
-## Der Gewinner ist für den Politikwissenschaftler der Bundesrat, insbesondere Doris Leuthard. «Sie hat versucht zu moderieren, wie es mit der SRG in Zukunft weitergehen soll. Das ist ihr gelungen.» Als Verlierer sieht Golder den Gewerbeverband. Er habe mit seiner Fehde mit Leuthard eine prominente Rolle im Ja-Lager übernommen, am Ende sei es aber für viele KMU nicht so klar gewesen, dass man die SRG und die Gebühren im Grundsatz hinterfragen solle. «Am Schluss stand der Gewerbeverband etwas alleine da.»
-## Marchand will Neustart
-## SRG-Generaldirektor Gilles Marchand hat auch nach dem deutlichen Nein zur «No Billag»-Initiative den Willen bekräftigt, das Unternehmen effizienter zu gestalten. Er kündigt wegen der Gebührensenkung, der Plafonierung der Einnahmen und der sinkenden Werbeerlöse Sparmassnahmen in der Höhe von 100 Millionen Franken an.
-## Die SRG werde bei der Infrastruktur, in der Verwaltung, in der Technik, bei den Immobilien, den Produktionsprozessen und in der Distribution sparen und effizienter werden. Das werde auch Auswirkungen auf die Zahl der Arbeitsplätze haben.
-## In Zukunft sollen 50 Prozent der Gebührengelder der SRG in die Information fliessen, wie Marchand weiter bekanntgab. Zusätzlich würden künftig Spielfilme nicht mehr von Werbung unterbrochen. Auch auf Texte ohne Verbindung zu einem Audio oder Video auf den Informations-Online-Seiten werde man verzichten. Ausserdem will die SRG den privaten Schweizer Medienanbietern ihre Archivinhalte zur Verfügung stellen. Sie wolle weiter auch keine regionale zielgruppenspezifische Werbung anbieten, auch wenn das dereinst regulatorisch möglich würde, sagte Marchand.
-## Resultate und Analysen
-## Das war der Abstimmungssonntag: Hier finden Sie den Liveticker zum Nachlesen.
-## Deutliche Worte von Leuthard
-## Aus Sicht von Medienministerin Doris Leuthard zeigt das Resultat zur «No Billag»-Initiative, dass die Bevölkerung mit dem öffentlichen Radio und Fernsehen verbunden ist.
-## Wenn eine Initiative mit 71 Prozent und mehr abgelehnt werde, spreche man in der Regel von einem «Absturz», einer «Klatsche». Die Initianten sollten in einem solchen Fall ihre Niederlage eingestehen und «nicht zehn Minuten später mit grossen Forderungen an den Bundesrat gelangen».
-## Klartext der Medienministerin
-## Leuthard: «Ein Absturz – eine Klatsche»
-## Verleger fordern Grenzen für SRG
-## Für den Verband Schweizer Medien (VSM) ist mit dem Nein die Diskussion um die SRG nicht vom Tisch. Die SRG dürfe nicht weiter expandieren, sondern müsse sich klar auf die Information fokussieren, so der VSM: Es brauche nun eine «trennscharfe Definition des Service-public-Auftrags der SRG».
-## Trotz Nein zu «No Billag»
-## Zeitungsverleger fordern neue Definition des SRG-Auftrags
-## Gewerkschaften erleichtert
-## Die Gewerkschaften sind erleichtert, dass mit der klaren Ablehnung der «No Billag»-Initiative Massenentlassungen bei den Radio- und Fernsehsendern verhindert werden können. Die Stimmbevölkerung habe ausserdem ein Zeichen gesetzt, dass sie nicht auf starke Medien verzichten wolle.
-## «Die Bevölkerung ist bereit, ihren Beitrag an die Qualitätsmedien zu leisten», schrieb etwa der Berufsverband Impressum. Mit dem Nein gewännen neben der Demokratie auch die Regionen, die weiterhin auf ihre Lokalmedien zählen könnten.
-## Für das Schweizer Syndikat Medienschaffender (SSM) dürften die angekündigten Reformen kein Abbauprogramm sein, sondern dazu beitragen, die Schweizer Medienlandschaft «robuster und krisenresistenter» zu machen.
-## «No Billag»-Initiative
-## Die Reaktionen: Die Befürworter wollen weiter Druck auf die SRG ausüben. Die Gegner sprechen von einem Sieg für den Service public.
-## Fortsetzung folgt
-## Die Diskussion über die Höhe der Gebühren ist noch nicht zu Ende. Mit dem Wechsel zur allgemeinen Abgabe sinkt der Betrag für Haushalte 2019 von heute 451 Franken auf 365 Franken im Jahr. Bereits sind jedoch parlamentarische Vorstösse für einen tieferen Betrag angekündigt worden.
-## «No Billag»-Gegner wiederum stellen sich auf den Standpunkt, nach dem klaren Votum dürfe nicht länger an der SRG «gesägt» werden. Es brauche nicht weniger, sondern einen zeitgemässen Service public, fordern sie. Aus dieser Ecke ist eine Volksinitiative zur «Medienvielfalt im digitalen Zeitalter» angekündigt worden.
-## Neues Mediengesetz
-## Auch der Bundesrat will die Regeln ans Internetzeitalter anpassen. Bis im Sommer will er den Entwurf für ein neues Mediengesetz vorlegen. Zur Diskussion steht eine direkte Medienförderung. Aus staats- und demokratiepolitischen Gründen müsse es das Ziel sein, Vielfalt und Qualität im Journalismus zu sichern, erklärte Medienministerin Doris Leuthard in einem Interview.
-## Der Bundesrat denke deshalb darüber nach, mit den bestehenden Mitteln künftig neben Radio und Fernsehen auch Online-Medien und die Nachrichtenagentur SDA finanziell zu unterstützen. Die Stossrichtung hatte der Bundesrat bereits in einem Bericht von 2016 vorgegeben.
-## Neue Konzession
-## Bereits begonnen hat die Vernehmlassung zur neuen SRG-Konzession, die ab 2019 gelten soll. Die Programme von Radio und Fernsehen SRF sollen sich stärker von jenen der Privaten abgrenzen. Zudem soll die SRG vermehrt Kooperationen mit Privaten eingehen. Mindestens die Hälfte der Empfangsgebühren soll in die Information fliessen.
-## Weiter will der Bundesrat der SRG künftig zielgruppenspezifische Werbung erlauben. Diese Werbeform soll aber beschränkt werden. Insbesondere darf sie sich nicht an regionale Zielgruppen richten. Die Verleger kritisierten die Pläne in der Vernehmlassung zur Revision der Radio- und Fernsehverordnung dennoch.
-## Bei einem Ja zur «No Billag»-Initiative wären die Radio- und Fernsehgebühren abgeschafft worden. Neben der SRG wären auch Privatradios, regionale Fernsehsender sowie die Schweizer Film- und Musikszene betroffen gewesen.
-## Bleiben Sie auf dem Laufenden
-## Der Abstimmungssonntag bei SRF
-## Neue Finanzordnung
-## Shutdown abgewendet: Bund darf weiter Steuern erheben
-## Nein zu «No Billag»-Initiative
-## Eine starke demokratische Legitimation für die SRG 
-## 54,4 Prozent schweizweit
-## Hohe Stimmbeteiligung wegen «No Billag»
-## Präsidenten zu «No Billag»
-## Die Debatte über den Service public ist lanciert
-## Keine wichtigen News verpassen
-## Erhalten Sie die wichtigsten Nachrichten per Browser-Push-Mitteilungen.
-## Mit Facebook oder Twitter registrieren
-## Für die Registrierung benötigen wir zusätzliche Angaben zu Ihrer Person.
-## Willkommen zurück
-## Bitte melden Sie sich an, um einen Kommentar zu erfassen.
-## .
-## Anmelden und Registrieren
-## Anmelden
-## Einfach und unkompliziert mit Ihrem Social Media Account anmelden
-## Neues Passwort erstellen
-## Geben Sie die E-Mail-Adresse Ihres Benutzerkontos an. Wir senden Ihnen anschliessend einen Link, über den Sie ein neues Passwort erstellen können.
-## abbrechen
-## Neues Passwort erstellen
-## Sie erhalten in Kürze eine E-Mail mit einem Link, um Ihr Passwort zu erneuern.
-## Keine Nachricht erhalten?
-## Wenn Sie nach 10 Minuten kein E-Mail erhalten haben, prüfen Sie bitte Ihren SPAM Ordner und die Angabe Ihrer E-Mail-Adresse.
-## Willkommen zurück
-## Bitte melden Sie sich an, um einen Kommentar zu erfassen.
-## Technischer Fehler
-## Oh Hoppla! Es ist ein technischer Fehler aufgetreten. Bitte versuchen Sie es später noch ein Mal oder kontaktieren Sie unseren Kundendienst.
-## Mobilnummer bestätigen
-## Damit Sie einen Kommentar erfassen können, bitten wir Sie, Ihre Mobilnummer zu bestätigen. Wir senden Ihnen einen SMS-Code an die Mobilnummer .
-## Wir haben Ihnen einen SMS-Code an die Mobilnummer  gesendet. Bitte geben Sie den SMS-Code in das untenstehende Feld ein.
-## Zu viele Versuche. Bitte fordern Sie einen neuen Code an oder kontaktieren Sie unseren Kundendienst.
-## Es wurden bereits zu viele Codes für die Mobilnummer angefordert. Um Missbrauch zu verhindern, wird die Funktion kurzzeitig blockiert.
-## Die maximale Anzahl an Codes für die angegebene Nummer ist erreicht. Es können keine weiteren Codes erstellt werden.
-## Mobilnummer ändern
-## E-Mail bestätigen
-## Wir haben Ihnen ein E-Mail an die Adresse  gesendet. Prüfen Sie bitte Ihr E-Mail-Postfach und bestätigen Sie Ihren Account über den erhaltenen Aktivierungslink.
-## Wenn Sie nach 10 Minuten kein E-Mail erhalten haben, prüfen Sie bitte Ihren SPAM-Ordner und die Angabe Ihrer E-Mail-Adresse.
-## Benutzerdaten anpassen
-## Registrieren und Anmelden
-## Registrieren
-## Mit einem SRF-Account erhalten Sie die Möglichkeit, Kommentare auf unserer Webseite sowie in der SRF App zu erfassen.
-## E-Mail bestätigen
-## Wir haben Ihnen ein E-Mail an die Adresse  gesendet. Prüfen Sie bitte Ihr E-Mail-Postfach und bestätigen Sie Ihren Account über den erhaltenen Aktivierungslink.
-## Wenn Sie nach 10 Minuten kein E-Mail erhalten haben, prüfen Sie bitte Ihren SPAM-Ordner und die Angabe Ihrer E-Mail-Adresse.
-## Benutzerdaten anpassen
-## Ihre Aktivierungs-E-Mail wurde versendet
-## Bitte prüfen Sie Ihr E-Mail-Postfach. Das Aktivierungs-E-Mail wurde versendet.
-## E-Mail-Adresse verifiziert
-## Vielen Dank für die Verifizierung Ihrer E-Mail-Adresse.
-## Benutzerkonto
-## In dieser Ansicht können Sie Ihre Benutzerdaten verwalten.
-## Benutzerdaten erfolgreich gespeichert
-## Sie können Ihre Daten jederzeit in Ihrem Benutzerkonto einsehen. 
-## Passwort ändern
-## Definieren Sie ein neues Passwort für Ihren Account .
-## abbrechen
-## Neues Passwort erstellen
-## Definieren Sie ein neues Passwort für Ihren Account.
-## Passwort erfolgreich gespeichert
-## Sie können sich nun im Artikel mit Ihrem neuen Passwort anmelden.
-## Ein neues Passwort erstellen
-## Wir haben den Code zum Passwort neusetzen nicht erkannt. Bitte geben Sie Ihre E-Mail-Adresse erneut ein, damit wir Ihnen einen neuen Link zuschicken können.
-## Neues Passwort erstellen
-## Sie erhalten in Kürze eine E-Mail mit einem Link, um Ihr Passwort zu erneuern.
-## Keine Nachricht erhalten?
-## Wenn Sie nach 10 Minuten kein E-Mail erhalten haben, prüfen Sie bitte Ihren SPAM Ordner und die Angabe Ihrer E-Mail-Adresse.
-## Account deaktivieren
-## Ihr Account wird deaktiviert und kann von Ihnen nicht wieder aktiviert werden. Erfasste Kommentare werden nicht gelöscht.
-## Wollen Sie Ihren Account wirklich deaktivieren?
-## Account deaktiviert
-## Kommentarfunktion deaktiviert
-## SRF Schweizer Radio und Fernsehen, Zweigniederlassung der Schweizerischen Radio- und Fernsehgesellschaft</code></pre>
+<pre><code>## La controverse «No Billag» - Le Temps
+## User account menu
+## Inscrivez-vous et recevez les newsletters de votre choix. Voir la liste.</code></pre>
 
 
 
