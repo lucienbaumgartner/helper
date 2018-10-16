@@ -10,7 +10,7 @@ rm(list=ls())
 source('~/r-helpers/google-search/google-search-fx.R')
 source('~/r-helpers/selenium-hacks/check-http-status-codes-fx.R')
 source('~/r-helpers/selenium-hacks/extract-txt-fx.R')
-source('~/r-helpers/text-analysis/text-post-processing-fx.R')
+source('~/r-helpers/text-analysis/text-cleaning-fx.R')
 
 # enter search term
 search.term <- "NoBillag"
@@ -31,6 +31,7 @@ hits.b <- check_status_code(hits) %>% print(n=100)
 ## get texts
 # add.queries:: add additional queries; default: //p & //title
 # preproc.expr:: additional regex expressions for preprocessing
+# merged:: if T: return collapsed text (\n-sep); if F :returns a list with character strings (contents for each html-element)
 txt <- pbmclapply(hits.b$url[hits.b$boolean==T], function(x){
   extract_txt(x,
               merged = FALSE,
@@ -38,14 +39,30 @@ txt <- pbmclapply(hits.b$url[hits.b$boolean==T], function(x){
               preproc.expr = '(^(\\s+)?$)|(\\\n(\\s+)?)|(\\s{2,})'
               )
 }, mc.cores=4)
-txt
+
+# example
+txt[[18]]
 
 ## clean text
-txt.clean <- pblapply(txt, function(x) post_processing(x,
+# raw:: if T: only returns annotated texts (tibble); if F: actually computes transformations
+# buzzwords:: additional buzzwords (default can be accessed by running `default.buzzwords`)
+#         |_ buzzwords are used to indicate possible sclicing points and to compute filter conditions
+# min.words:: minimum number of words per single character string (used for filtering, default: 3)
+# min.avg.characters:: minimum number of avg.characters per word for each single character string (used for filtering, default: 3)
+# max.buzzwords:: max. number of buzzwords allowed per character string (default: 2)
+# sclicing:: whether slicing is allowed or not [slicing==deleting last part of text according to user-specified conditions] (T/F)
+# slicing.keywords:: character string with additional slicing keywords (default can be accessed by running `default.slicing.keywords`)
+#         |_ [!!!] each slicing keywords have to be identical to a buzzword
+#         |_ [!!!] HENCE: sclicing.keyword is a subset of buzzwords
+#         |_ [!!!] it is recommended to use them very cautiously, since they lead to deletions of whole text parts
+# scnd.step.slicing:: last share of the document that will be used to compute the sum buzzwords (default: 3; meaning: last third of the document)
+# scnd.step.threshold:: max number of buzzwords allowed in scnd.step.slicing before proceeding to slice the data (default: 4)
+
+txt.clean <- pblapply(txt, function(x) clean_text(x,
                                                        min.words = 4,
-                                                       max.buzzwords = 3,
-                                                       scnd.step.slicing=3, 
-                                                       scnd.step.threshold = 5,
+                                                       max.buzzwords = 4,
+                                                       scnd.step.slicing = 4, 
+                                                       scnd.step.threshold = 21,
                                                        buzzwords = c('bild',
                                                                      'video',
                                                                      'kontakt', 
@@ -63,8 +80,9 @@ txt.clean <- pblapply(txt, function(x) post_processing(x,
                                                                      '([0-9]{5,})',
                                                                      '(\\|)')))
 
-txt.clean[[18]] %>% print(n=500)
+# example
+txt.clean[[6]] %>% print(n=500)
 
-checks <- sapply(1:length(txt),function(x) txt[[x]][!txt[[x]]%in%txt.clean[[x]]$txt]) 
-unlist(sapply(1:length(txt),function(x) txt[[x]][!txt[[x]]%in%txt.clean[[x]]$txt])) %>% tail(1000)
-checks[1]
+# all the deleted elements 
+unlist(sapply(1:length(txt),function(x) txt[[x]][!txt[[x]]%in%txt.clean[[x]]$txt]))
+
