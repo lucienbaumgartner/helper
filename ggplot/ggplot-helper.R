@@ -1,11 +1,18 @@
 # empty theme
-theme_empty <- theme(panel.grid.major = element_blank(), 
-                     panel.grid.minor = element_blank(), 
-                     panel.background = element_blank(),
-                     axis.line = element_blank(),
-                     axis.title = element_blank(),
-                     axis.ticks = element_blank(),
-                     axis.text = element_blank())
+theme_empty <- function(title.spacing=0, subtitle.spacing=0){
+  thm <- theme(panel.grid.major = element_blank(), 
+               panel.grid.minor = element_blank(), 
+               panel.background = element_blank(),
+               axis.line = element_blank(),
+               axis.title = element_blank(),
+               axis.ticks = element_blank(),
+               axis.text = element_blank(),
+               legend.key = element_blank(),
+               plot.title = element_text(face='bold', margin=margin(0,0,title.spacing,0)),
+               plot.subtitle = element_text(margin=margin(0,0,subtitle.spacing,0))
+               )
+  return(thm)
+}
 
 theme_void <- function(grid='major', grid.color='lightgrey', title.spacing=0, subtitle.spacing=0, x.lab.spacing=0, y.lab.spacing=0){
   thm <- theme(
