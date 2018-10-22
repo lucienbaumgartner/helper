@@ -28,12 +28,17 @@ cycler <- function(start, time.limit, keywords){
   strt <- Sys.time()
   while(any(!url_list%in%url_log)){
     url_log <- c(url_list[!url_list%in%url_log], url_log)
-    url_list <- lapply(url_list, function(x) snowballer(x, keywords=keywords)) %>% 
+    url_list <- tryCatch(lapply(url_list, function(x){
+      res <- snowballer(x, keywords=keywords)
+      stp <- Sys.time()
+      if(difftime(stp, strt, units = c('secs'))>time.limit){break}else{return(res)}
+      }) %>% 
       unlist %>% 
       c(url_list, .) %>% 
-      unique
+      unique, error=function(e){return(unique(c(url_list, url_log)))})
     stp <- Sys.time()
-    if(stp-strt>time.limit) break
+    if(difftime(stp, strt, units = c('secs'))>time.limit) break
   }
+  
   return(url_list)
 }
