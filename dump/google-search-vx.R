@@ -37,7 +37,7 @@ txt <- pbmclapply(hits.b$url[hits.b$boolean==T], function(x){
               merged = FALSE,
               add.queries = c(h2 = '//h2', h3 = '//h3', li='//li'), 
               preproc.expr = '(^(\\s+)?$)|(\\\n(\\s+)?)|(\\s{2,})'
-              )
+  )
 }, mc.cores=4)
 
 # example
@@ -59,26 +59,26 @@ txt[[18]]
 # scnd.step.threshold:: max number of buzzwords allowed in scnd.step.slicing before proceeding to slice the data (default: 4)
 
 txt.clean <- pblapply(txt, function(x) clean_text(x,
-                                                       min.words = 4,
-                                                       max.buzzwords = 4,
-                                                       scnd.step.slicing = 4, 
-                                                       scnd.step.threshold = 21,
-                                                       buzzwords = c('bild',
-                                                                     'video',
-                                                                     'kontakt', 
-                                                                     'links',
-                                                                     '(\\&)',
-                                                                     'registrier',
-                                                                     'vielen dank',
-                                                                     'wir wünschen ihnen',
-                                                                     'nzz', 
-                                                                     'blick',
-                                                                     'anmeld',
-                                                                     'passwort',
-                                                                     'alle rechte',
-                                                                     'medienwoche',
-                                                                     '([0-9]{5,})',
-                                                                     '(\\|)')))
+                                                  min.words = 4,
+                                                  max.buzzwords = 4,
+                                                  scnd.step.slicing = 4, 
+                                                  scnd.step.threshold = 21,
+                                                  buzzwords = c('bild',
+                                                                'video',
+                                                                'kontakt', 
+                                                                'links',
+                                                                '(\\&)',
+                                                                'registrier',
+                                                                'vielen dank',
+                                                                'wir wünschen ihnen',
+                                                                'nzz', 
+                                                                'blick',
+                                                                'anmeld',
+                                                                'passwort',
+                                                                'alle rechte',
+                                                                'medienwoche',
+                                                                '([0-9]{5,})',
+                                                                '(\\|)')))
 
 # example
 txt.clean[[6]] %>% print(n=500)
@@ -87,11 +87,11 @@ txt.clean[[6]] %>% print(n=500)
 unlist(sapply(1:length(txt),function(x) txt[[x]][!txt[[x]]%in%txt.clean[[x]]$txt]))
 
 
-parameters <- expand.grid(scnd.step.slicing=1:5, 
-                          scnd.step.threshold=10:30, 
-                          min.words=1:6, 
-                          min.avg.characters=1:10, 
-                          max.buzzwords=1:8)
+parameters <- expand.grid(scnd.step.slicing=3:5, 
+                          scnd.step.threshold=20:30, 
+                          min.words=1:4, 
+                          min.avg.characters=3:6, 
+                          max.buzzwords=1:5)
 buzzwords <- c('bild',
                'video',
                'kontakt', 
@@ -123,17 +123,18 @@ benchmarking <- lapply(txt, function(txt){
     )
     
     return(tibble(avg.nchars = mean(sapply(tmp, sum(nchar, nr.rm = T))),
-           p.identical = txt[!txt%in%tmp$txt]/nrow(txt)))
+                  p.identical = txt[!txt%in%tmp$txt]/nrow(txt)))
   }, scnd.step.slicing=parameters$scnd.step.slicing, list(scnd.step.threshold=parameters$scnd.step.threshold,
-                   min.words=parameters$min.words,
-                   min.avg.characters=parameters$min.avg.characters,
-                   max.buzzwords=parameters$max.buzzwords))
+                                                          min.words=parameters$min.words,
+                                                          min.avg.characters=parameters$min.avg.characters,
+                                                          max.buzzwords=parameters$max.buzzwords))
   return(temp)
 })
 
 
-avg <- pbmclapply(1:length(txt), function(indx){
-  temp <- lapply(1:nrow(parameters), function(x){
+temp <- lapply(1:length(txt), function(indx){
+  print(indx)
+  temp <- pbmclapply(1:nrow(parameters), function(x){
     clean_text(txt=txt[[indx]], 
                buzzwords = buzzwords, 
                slicing = T,
@@ -145,22 +146,16 @@ avg <- pbmclapply(1:length(txt), function(indx){
                max.buzzwords=parameters$max.buzzwords[x]
     )
     
-  })}, 
-  mc.cores = 4)
-  
+  }, mc.cores = 5)})
+
 benchmarking.avg <- lapply(1:length(txt), function(indx){
   print(indx)
   avg <- pbmclapply(1:length(temp[[1]]), function(y){
-           tibble(
-               avg.nchars = mean(sapply(temp[[indx]][[y]]$txt, function(x) sum(nchar(x), nr.rm = T))),
-               p.identical = length(txt[[indx]][!txt[[indx]]%in%temp[[indx]][[y]]$txt])/nrow(txt[[indx]])
-             )
-         }, mc.cores = 5) %>% 
-           do.call(rbind, .)
-     })
-avg[[1]]
-       p.identical = sapply(txt[[1]][!txt[[1]]%in%tmp$txt]/nrow(txt[[1]])))
-       
-benchmarking[[1]]
-avg <- pbmclapply(1:length(temp), function(y) mean(sapply(temp[[y]], function(x) sum(nchar(x), nr.rm = T)), na.rm = T), mc.cores = 5)
+    tibble(
+      avg.nchars = mean(sapply(temp[[indx]][[y]]$txt, function(x) sum(nchar(x), nr.rm = T))),
+      p.identical = length(txt[[indx]][!txt[[indx]]%in%temp[[indx]][[y]]$txt])/nrow(txt[[indx]])
+    )
+  }, mc.cores = 5) %>% 
+    do.call(rbind, .)
+})
 

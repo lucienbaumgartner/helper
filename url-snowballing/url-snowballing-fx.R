@@ -1,4 +1,6 @@
-snowballer <- function(url, keywords){
+library(stringr)
+
+snowballer <- function(url, keywords=NULL){
   trunk <- str_extract(url, '^https?://[^/]+')
   html <- paste(suppressWarnings(tryCatch({readLines(url, skipNul = T)}, error=function(e){e})), collapse="\n")
   if(!suppressWarnings(grepl('Error', html))){
@@ -12,8 +14,8 @@ snowballer <- function(url, keywords){
       }
     }) %>% 
       unname %>% 
-      na.omit %>% 
-      .[grepl(keywords, .)]
+      na.omit
+    if(!is.null(keywords)) links <- links[grepl(keywords, tolower(links))]
     return(links)
   }else{
     return(NULL)
