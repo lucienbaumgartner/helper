@@ -1,15 +1,26 @@
 ---
 title: "Google Search crawling, HTTP status checks, URL snowballing, and text mining"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    number_sections: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=F)
 ```
 
-## 
+```{r echo=F}
+source('~/r-helpers/google-search/google-search-fx.R')
+source('~/r-helpers/selenium-hacks/check-http-status-codes-fx.R')
+source('~/r-helpers/selenium-hacks/extract-txt-fx.R')
+source('~/r-helpers/text-analysis/text-cleaning-fx.R')
+source('~/r-helpers/url-snowballing/url-snowballing-fx.R')
+```
 
-The following procedure has been developed to provide a stable URL collection method than can be coupled with text extraction and text burning features. The workflow has the flowwoing structure
+# Overview
+
+The following procedure has been developed to provide a stable URL collection method than can be coupled with text extraction and text burning features. The workflow has the following structure:
 
 ```
 [[GOOGLE SEARCH CRAWLING]]
@@ -56,16 +67,147 @@ _ create Google Search URLs
       |_ n: drop 
 ```
 
-```{r cars}
-summary(cars)
+# Functions
+
+These are the functions I've written for each task
+
+## Google Search crawling
+
+### Get search URLs
+```{r}
+get_search_url
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+### Get top n pages of hits
+```{r}
+get_google_hits
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## HTTP status checks
+```{r}
+check_status_code
+```
+
+
+## URL snowballing
+
+### Snowballing algorithm
+```{r}
+snowballer
+```
+
+### Cycler
+
+```{r}
+cycler
+```
+
+## Text mining
+
+
+### Text extraction
+```{r}
+extract_txt
+```
+
+### Text burning
+```{r}
+clean_text
+```
+
+Dependencies:
+
+```{r}
+buzz_matches
+```
+
+# Display Case 
+```{r eval=F}
+library(XML)
+library(RCurl)
+library(pbapply)
+library(dplyr)
+library(stringi)
+library(pbmcapply)
+
+rm(list=ls())
+
+source('~/r-helpers/google-search/google-search-fx.R')
+source('~/r-helpers/selenium-hacks/check-http-status-codes-fx.R')
+source('~/r-helpers/selenium-hacks/extract-txt-fx.R')
+source('~/r-helpers/text-analysis/text-cleaning-fx.R')
+source('~/r-helpers/url-snowballing/url-snowballing-fx.R')
+
+inames <- read.table('~/share/socsc1/input/names-initatives')
+
+setwd('~/share/socsc1/output/')
+
+### wrapper for all initatives
+
+res <- lapply(inames, function(inames){
+  
+  print(inames)
+  
+  # enter search term
+  search.term <- inames
+  
+  ## specify the URL for searches:
+  # quotes:: quoted search term (T/F)
+  # n.pages:: number pages that should be returned; if n.pages > 1 -> additional urls are gerated for each page
+  search.url <- get_search_url(search.term=search.term, language = 'de', quotes=F, n.pages=400)
+  
+  ## get hits back
+  # raw:: if you want the raw url (T/F)
+  # drop.recursive:: if you want to drop results from picture result suggestions etc. (T/F)
+  hits <- pbmclapply(search.url[1:10], function(x) get_google_hits(x, raw=F, drop.recursives = T), mc.cores=4)
+  
+  # filter out all pages with no results
+  hits <- hits[lengths(hits)>0]
+  
+  # save hits
+  save(hits, file=paste0('hits-full-', tolower(gsub('\\s+', '', search.term)), '.RDS'))
+  
+  # check if they can be accessed or are dead links (is able to handle lists and vectors!)
+  hits.b <- check_status_code(hits) %>% print(n=100)
+  
+  # save checks
+  save(hits.b, file=paste0('hits-checked-', tolower(gsub('\\s+', '', search.term)), '.RDS'))
+  
+  ## use the snowballing algorithm
+  # NOT RUN: we use a keyword-restriction, only collecting links containing (no-billag|nobillag)
+  snow.balls <- pbmclapply(hits.b$url[hits.b$boolean==T], function(x){
+    cycler(start=x, 
+           time.limit=60,
+           keywords='no?(-)billag'
+    )
+  }, mc.cores=3)
+  
+  # save
+  save(snow.balls, file=paste0('snowballing-res-', tolower(gsub('\\s+', '', search.term)), '.RDS'))
+  
+  unique(unlist(snow.balls))
+  
+  # check them again
+  snow.balls.b <- check_status_code(snow.balls) %>% print(n=100)
+  
+  ## get texts
+  # add.queries:: add additional queries; default: //p & //title
+  # preproc.expr:: additional regex expressions for preprocessing
+  # merged:: if T: return collapsed text (\n-sep); if F :returns a list with character strings (contents for each html-element)
+  txt <- pblapply(snow.balls.b$url[snow.balls.b$boolean==T], function(x){
+    extract_txt(x,
+                merged = FALSE,
+                add.queries = c(h2 = '//h2', h3 = '//h3', li='//li'), 
+                preproc.expr = '(^(\\s+)?$)|(\\\n(\\s+)?)|(\\s{2,})'
+    )
+  })
+  
+  # save texts
+  save(snow.balls, file=paste0('txt-extrctd-', tolower(gsub('\\s+', '', search.term)), '.RDS'))
+  
+})
+
+save(res, file='res-compiled.RDS')
+```
+
