@@ -1,0 +1,71 @@
+---
+title: "Google Search crawling, HTTP status checks, URL snowballing, and text mining"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 
+
+The following procedure has been developed to provide a stable URL collection method than can be coupled with text extraction and text burning features. The workflow has the flowwoing structure
+
+```
+[[GOOGLE SEARCH CRAWLING]]
+_ create Google Search URLs
+  |_ extract top hits from n pages
+    x .. [[HTTP STATUS CHECKS]]
+    |_ check whether the webpages are still available
+      |_ y: keep
+        x .. [[URL SNOWBALLING]]
+        |_ for ervery google hit; SET: 
+          |_ URL restriction parameter 
+            [keywords that have to be in the URL for it to be added to the collection]
+          |_ time limit for QUERY
+            [from root URL]
+        |_ for ervery google hit; DO.CALL: snowballing algorithm
+            |_ access root URL; extract all hrefs
+            |_ add hrefs to LOG-file{ONLY IF: new}
+              |_ access new hrefs from LOG; extract all hrefs
+              |_ add hrefs to LOG-file{ONLY IF: new}
+                |_ .. UNTIL no new unique hrefs
+                    .. BREAK{IF: time reached before collection completed}
+                      [prevents endless crawling]
+                      x .. [[HTTP STATUS CHECKS]]
+                      |_ check whether the webpages are still available
+                        |_ y: keep
+                          ///// OPTIONAL: .. [[TEXT MINING]]
+                          x
+                          |_ exctract texts; SET:
+                            |_ HTML elements that should be extracted
+                            |_ preprocessing regex
+                            |_ merged (y/n) [single/multielement]
+                              x
+                              |_ burning algorithm; SET:
+                                ///// for EXPL see below
+                                |_ buzzwords
+                                |_ min.words
+                                |_ min.avg.characters
+                                |_ max.buzzwords
+                                |_ sclicing
+                                |_ slicing.keywords
+                                |_ scnd.step.slicing
+                                |_ scnd.step.threshold
+                        |_ n: drop 
+      |_ n: drop 
+```
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
