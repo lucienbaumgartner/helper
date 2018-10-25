@@ -1,5 +1,7 @@
 ---
 title: "Google Search crawling, HTTP status checks, URL snowballing, text scraping, and document burning"
+author: "Lucien Baumgartner"
+date: "10/25/2018"
 output: 
   html_document:
     toc: true
