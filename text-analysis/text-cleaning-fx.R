@@ -34,6 +34,7 @@ default.slicing.keywords <- c('impressum',
 
 clean_text <- function(txt,
                        raw=F,
+                       hard.filter=NULL,
                        buzzwords=NULL, # character string with buzzwords
                        slicing=T, # if slicing should be performed
                        slicing.keywords=NULL, # deterministic slicing keywords [caution!]
@@ -43,6 +44,8 @@ clean_text <- function(txt,
                        min.avg.characters=3, # minimum number of avg.characters per word for each single character string (used for filtering)
                        max.buzzwords=2 # max. number of buzzwords allowed per character string
 ){
+  if(is.list(txt)) txt <- unlist(txt, recursive = F)
+  if(length(txt)%in%c(0,1)){return(NA)}
   if(is.null(buzzwords)) buzzwords <- default.buzzwords
   buzzwords <- paste0(c(buzzwords, default.buzzwords), collapse = '|')
   if(is.null(slicing.keywords)) slicing.keywords <- default.slicing.keywords
@@ -71,6 +74,7 @@ clean_text <- function(txt,
       }
     }
     txt <- filter(txt, !(n.words<min.words|nchar.words.mean<min.avg.characters|n.buzzwords>=max.buzzwords))
+    if(!is.null(hard.filter)) txt <- filter(txt, !grepl(paste0(hard.filter, collapse = '|'), txt))
     if(isTRUE(slicing)&sum(txt$n.buzzwords[round(nrow(txt)-nrow(txt)/scnd.step.slicing, 0):nrow(txt)])>scnd.step.threshold){
       temp <- txt[round(nrow(txt)-nrow(txt)/scnd.step.slicing, 0):nrow(txt),]
       id <- temp$id[min(which(temp$n.buzzwords>0))]
