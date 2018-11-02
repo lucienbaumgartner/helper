@@ -42,7 +42,8 @@ clean_text <- function(txt,
                        scnd.step.threshold=4, # max number of buzzwords allowed in scnd.step.slicing before proceeding to slice the data
                        min.words=3, # minimum number of words per single character string (used for filtering)
                        min.avg.characters=3, # minimum number of avg.characters per word for each single character string (used for filtering)
-                       max.buzzwords=2 # max. number of buzzwords allowed per character string
+                       max.buzzwords=2, # max. number of buzzwords allowed per character string
+                       recover.fs=50
 ){
   if(is.list(txt)) txt <- unlist(txt, recursive = F)
   if(length(txt)%in%c(0,1)){return(NA)}
@@ -63,6 +64,7 @@ clean_text <- function(txt,
                 ),
                 id=paste0('id_', 1:length(n.buzzwords))
   )
+  txt_log <- txt
   if(isTRUE(raw)){
     return(txt)
   }else{
@@ -80,6 +82,7 @@ clean_text <- function(txt,
       id <- temp$id[min(which(temp$n.buzzwords>0))]
       txt <- txt[as.integer(seq_len(min(which(txt$id==id))-1)),]
     }
+    txt <- txt_log[(txt_log$id%in%txt$id)|(txt_log$n.words>=recover.fs),]
     return(txt)
   }
   

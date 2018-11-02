@@ -1,5 +1,5 @@
 # empty theme
-theme_empty <- function(title.spacing=0, subtitle.spacing=0){
+theme_empty <- function(title.spacing=0, subtitle.spacing=0, title.bold=F){
   thm <- theme(panel.grid.major = element_blank(), 
                panel.grid.minor = element_blank(), 
                panel.background = element_blank(),
@@ -8,9 +8,12 @@ theme_empty <- function(title.spacing=0, subtitle.spacing=0){
                axis.ticks = element_blank(),
                axis.text = element_blank(),
                legend.key = element_blank(),
-               plot.title = element_text(face='bold', margin=margin(0,0,title.spacing,0)),
+               plot.title = element_text(margin=margin(0,0,title.spacing,0)),
                plot.subtitle = element_text(margin=margin(0,0,subtitle.spacing,0))
                )
+  if(isTRUE(title.bold)){
+    thm + theme(plot.title = element_text(face = 'bold'))
+  }
   return(thm)
 }
 

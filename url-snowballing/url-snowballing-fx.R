@@ -1,6 +1,6 @@
 library(stringr)
 
-snowballer <- function(url, keywords=NULL){
+snowballer <- function(url, keywords=NULL, key.match='outer'){
   trunk <- str_extract(url, '^https?://[^/]+')
   html <- paste(suppressWarnings(tryCatch({readLines(url, skipNul = T)}, error=function(e){e})), collapse="\n")
   if(!suppressWarnings(grepl('Error', html))){
@@ -15,14 +15,28 @@ snowballer <- function(url, keywords=NULL){
     }) %>% 
       unname %>% 
       na.omit
-    if(!is.null(keywords)) links <- links[grepl(keywords, tolower(links))]
+    if(!is.null(keywords)&key.match=='outer') links <- links[grepl(keywords, tolower(links))]
+    if(!is.null(keywords)&key.match=='inner'){
+      log <- sapply(links, function(x){
+        if(url.exists(x)){
+          html <- getURL(x, followlocation = TRUE)
+          doc = htmlParse(html, asText=TRUE)
+          queries <- c(title = "//title", text = "//p")
+          plain.text <- xpathSApply(doc, queries, xmlValue)
+          return(any(grepl(keywords, tolower(plain.text))))
+        }else{
+          return(NA)
+        }
+      })
+      links <- links[ifelse(is.na(log), FALSE, log)]
+    }
     return(links)
   }else{
     return(NULL)
   }
 }
 
-cycler <- function(start, time.limit, keywords){
+cycler <- function(start, time.limit, keywords, key.match='outer'){
   url_log <- NULL  
   url_list <- start
   strt <- Sys.time()
