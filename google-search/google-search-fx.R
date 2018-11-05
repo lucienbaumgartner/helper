@@ -15,8 +15,7 @@ get_search_url <- function(search.term, language = 'de',  domain = '.ch', quotes
 }
 
 get_google_hits <- function(google.url, raw=T, drop.recursives=F) {
-  doc <- getURL(google.url, httpheader = c("User-Agent" = "R
-                                             (2.10.0)"))
+  doc <- getURL(URLencode(google.url), .opts=curlOptions(followlocation=TRUE, cookiefile="nosuchfile"))
   html <- htmlTreeParse(doc, useInternalNodes = TRUE, error=function(...){})
   nodes <- getNodeSet(html, "//h3[@class='r']//a")
   raw.refs <- sapply(nodes, function(x) x <- xmlAttrs(x)[["href"]])

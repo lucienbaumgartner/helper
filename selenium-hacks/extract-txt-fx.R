@@ -1,12 +1,12 @@
 library(XML)
 library(RCurl)
-library(pbapply)
 
 extract_txt <- function(urls, merged=TRUE, add.queries=NULL, preproc.expr=NULL){
   if(is.list(urls)) url <- unlist(urls)
   
-  pbsapply(urls, function(s.url){
-    html <- getURL(s.url, followlocation = TRUE)
+  sapply(urls, function(s.url){
+    html <- tryCatch(getURL(s.url, followlocation = TRUE), error=function(e) return(NA))
+    if(is.na(html)) return(NA)
     
     doc = htmlParse(html, asText=TRUE)
     queries <- c(title = "//title", text = "//p", add.queries)
