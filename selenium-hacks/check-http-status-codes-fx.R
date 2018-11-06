@@ -7,7 +7,8 @@ check_status_code <- function(hits){
   hits.bool <- pbsapply(hits, function(x){
     tryCatch(
       {res <- withTimeout({url.exists(x)}, timeout = 10)},
-      TimeoutException = function(ex){NA}
+      TimeoutException = function(ex){NA}, 
+      error = function(e){NA}
       ) 
   }) %>% 
     tibble(boolean=., url=names(.))

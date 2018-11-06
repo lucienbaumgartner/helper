@@ -5,10 +5,17 @@ extract_txt <- function(urls, merged=TRUE, add.queries=NULL, preproc.expr=NULL){
   if(is.list(urls)) url <- unlist(urls)
   
   sapply(urls, function(s.url){
-    html <- tryCatch(getURL(s.url, followlocation = TRUE), error=function(e) return(NA))
+    html <- tryCatch(withTimeout({getURL(s.url, followlocation = TRUE)},
+                                 timeout = 10), 
+                     TimeoutException = function(ex){NA},
+                     error=function(e){return(NA)})
     if(is.na(html)) return(NA)
     
-    doc = htmlParse(html, asText=TRUE)
+    doc <- tryCatch(withTimeout({htmlParse(html, asText=TRUE)},
+                                timeout = 10), 
+                    TimeoutException = function(ex){NA},
+                    error = function(e){return(NA)})
+    if(is.na(doc)) return(NA)
     queries <- c(title = "//title", text = "//p", add.queries)
     plain.text <- xpathSApply(doc, queries, xmlValue)
     plain.text <- gsub('(\\{.*\\}(\\.)?)|(^\\.$)', '', plain.text)
