@@ -58,6 +58,25 @@ theme_void_T <- theme(panel.background = element_blank(),
                     panel.grid.major = element_blank(), 
                     panel.grid.minor = element_blank())
 
+null.expand <- function(gg.object=NULL,
+                        axis='both', 
+                        type.x='continuous', 
+                        type.y='continuous'){
+  if(identical(axis, 'both')){
+    eval(parse(text=paste('gg.object', 
+                          '+', 
+                          paste0('scale_x_', type.x, '(expand=c(0.01,0.01))'),
+                          '+',
+                          paste0('scale_y_', type.y, '(expand=c(0.01,0.01))'))))
+  }
+  if(identical(axis, 'x')){
+    return(eval(parse(text=paste0('scale_x_', type.x, '(expand=c(0.01,0.01))'))))
+  }
+  if(identical(axis, 'y')){
+    return(eval(parse(text=paste0('scale_y_', type.y, '(expand=c(0.01,0.01))'))))
+  }
+}
+
 # crop legend from plot
 g_legend<- function(a.gplot){
   tmp <- ggplot_gtable(ggplot_build(a.gplot))

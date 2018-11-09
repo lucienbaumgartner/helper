@@ -17,7 +17,11 @@ extract_txt <- function(urls, merged=TRUE, add.queries=NULL, preproc.expr=NULL){
                     error = function(e){return(NA)})
     if(is.na(doc)) return(NA)
     queries <- c(title = "//title", text = "//p", add.queries)
-    plain.text <- xpathSApply(doc, queries, xmlValue)
+    plain.text <- tryCatch(withTimeout({xpathSApply(doc, queries, xmlValue)},
+                                timeout = 10), 
+                    TimeoutException = function(ex){NA},
+                    error = function(e){return(NA)})
+    if(all(is.na(plain.text))) return(NA)
     plain.text <- gsub('(\\{.*\\}(\\.)?)|(^\\.$)', '', plain.text)
     if(!is.null(preproc.expr)) plain.text <- plain.text[!grepl(preproc.expr, plain.text)]
     if(isTRUE(merged)){
