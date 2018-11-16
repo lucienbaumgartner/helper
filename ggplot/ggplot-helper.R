@@ -86,3 +86,23 @@ g_legend<- function(a.gplot){
   legend <- tmp$grobs[[leg]]
   return(legend)
 }
+
+# generate circular data
+circleFun <- function(center = c(0,0),diameter = 1, npoints = 100){
+  r = diameter / 2
+  tt <- seq(0,2*pi,length.out = npoints)
+  xx <- center[1] + r * cos(tt)
+  yy <- center[2] + r * sin(tt)
+  return(data.frame(x = xx, y = yy))
+}
+
+# rescaler function for continuous fills
+center_around <- function(center=0) {
+  function(x, to=NA, from=NA) {
+    r <- max(abs(from-center))
+    (x - (center-r)) / 2/r
+  }
+}
+
+## Do not run
+# scale_fill_gradientn(colors = c('#011A27', '#F0810F', '#E6DF44'), rescaler = center_around(2000))
