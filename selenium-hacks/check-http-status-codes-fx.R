@@ -1,12 +1,13 @@
 library(R.utils)
+library(httr)
 
 check_status_code <- function(hits){
   
   if(is.list(hits)) hits <- unlist(hits)
   
   hits.bool <- pbsapply(hits, function(x){
-    tryCatch(
-      {res <- withTimeout({url.exists(x)}, timeout = 10)},
+    res <- tryCatch(
+      {withTimeout({!http_error(x)}, timeout = 10)},
       TimeoutException = function(ex){NA}, 
       error = function(e){NA}
       ) 
