@@ -52,7 +52,7 @@ clean_text <- function(txt,
   buzzwords <- paste0(c(buzzwords, default.buzzwords), collapse = '|')
   if(is.null(slicing.keywords)) slicing.keywords <- default.slicing.keywords
   slicing.keywords <- paste0(c(slicing.keywords, default.slicing.keywords), collapse = '|')
-  # txt <- iconv(enc2utf8(txt), 'UTF-8', 'ASCII')
+  txt <- iconv(enc2utf8(txt), 'UTF-8', 'ASCII')
   txt_splt <- sapply(txt, function(string) strsplit(string, ' '))
   txt <- tibble(txt=txt, 
                 n.words=lengths(txt_splt),
