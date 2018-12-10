@@ -2,11 +2,13 @@
 title: "Google Search crawling, HTTP status checks, URL snowballing, text scraping, and document burning"
 author: "Lucien Baumgartner"
 date: "10/25/2018"
+redirect_from: "https://lucienbaumgartner.github.io/projects/2018/07/03/url-crawler.html"
 output:
   html_document:
     toc: true
     number_sections: true
     keep_md: yes
+
 ---
 
 
@@ -89,16 +91,16 @@ get_search_url
 ```
 
 ```
-## function (search.term, language = "de", domain = ".ch", quotes = TRUE, 
-##     n.pages = 1) 
+## function (search.term, language = "de", domain = ".ch", quotes = TRUE,
+##     n.pages = 1)
 ## {
 ##     search.term <- gsub(" ", "%20", search.term)
-##     if (isTRUE(quotes)) 
+##     if (isTRUE(quotes))
 ##         search.term <- paste("%22", search.term, "%22", sep = "")
-##     google.url <- paste("http://www.google", domain, "/search?", 
+##     google.url <- paste("http://www.google", domain, "/search?",
 ##         "hl=", language, "&q=", search.term, sep = "")
 ##     if (n.pages > 1) {
-##         return(c(google.url, paste0(google.url, "&ei=q-W9W-2MBoTCwALs5aPwBg&start=", 
+##         return(c(google.url, paste0(google.url, "&ei=q-W9W-2MBoTCwALs5aPwBg&start=",
 ##             (1:(n.pages - 1)) * 10, "&sa=N")))
 ##     }
 ##     else {
@@ -117,21 +119,21 @@ get_google_hits
 ```
 
 ```
-## function (google.url, raw = T, drop.recursives = F) 
+## function (google.url, raw = T, drop.recursives = F)
 ## {
-##     doc <- getURL(URLencode(google.url), .opts = curlOptions(followlocation = TRUE, 
+##     doc <- getURL(URLencode(google.url), .opts = curlOptions(followlocation = TRUE,
 ##         cookiefile = "nosuchfile"))
 ##     html <- htmlTreeParse(doc, useInternalNodes = TRUE, error = function(...) {
 ##     })
 ##     nodes <- getNodeSet(html, "//h3[@class='r']//a")
 ##     raw.refs <- sapply(nodes, function(x) x <- xmlAttrs(x)[["href"]])
-##     if (isTRUE(drop.recursives)) 
+##     if (isTRUE(drop.recursives))
 ##         raw.refs <- raw.refs[!grepl("\\/search\\?q\\=", raw.refs)]
 ##     if (isTRUE(raw)) {
 ##         return(raw.refs)
 ##     }
 ##     else {
-##         clean.refs <- gsub("(\\/url\\?q\\=)|(\\&sa.*)", "", raw.refs) %>% 
+##         clean.refs <- gsub("(\\/url\\?q\\=)|(\\&sa.*)", "", raw.refs) %>%
 ##             sapply(., function(x) URLdecode(URLdecode(x)))
 ##         return(clean.refs)
 ##     }
@@ -148,9 +150,9 @@ check_status_code
 ```
 
 ```
-## function (hits) 
+## function (hits)
 ## {
-##     if (is.list(hits)) 
+##     if (is.list(hits))
 ##         hits <- unlist(hits)
 ##     hits.bool <- pbsapply(hits, function(x) {
 ##         res <- tryCatch({
@@ -180,7 +182,7 @@ snowballer
 ```
 
 ```
-## function (url, keywords = NULL, key.match = "outer") 
+## function (url, keywords = NULL, key.match = "outer")
 ## {
 ##     trunk <- str_extract(url, "^https?://[^/]+")
 ##     html <- paste(suppressWarnings(tryCatch({
@@ -196,7 +198,7 @@ snowballer
 ##                 return(paste0(trunk, x))
 ##             }
 ##             else {
-##                 if (grepl("^#", x) | !grepl("(http?(s))|(\\.html)", 
+##                 if (grepl("^#", x) | !grepl("(http?(s))|(\\.html)",
 ##                   x)) {
 ##                   return(NA)
 ##                 }
@@ -205,7 +207,7 @@ snowballer
 ##                 }
 ##             }
 ##         }) %>% unname %>% na.omit
-##         if (!is.null(keywords) & key.match == "outer") 
+##         if (!is.null(keywords) & key.match == "outer")
 ##             links <- links[grepl(keywords, tolower(links))]
 ##         if (!is.null(keywords) & key.match == "inner") {
 ##             log <- sapply(links, function(x) {
@@ -240,7 +242,7 @@ cycler
 ```
 
 ```
-## function (start, time.limit, keywords, key.match = "outer") 
+## function (start, time.limit, keywords, key.match = "outer")
 ## {
 ##     url_log <- NULL
 ##     url_list <- start
@@ -260,7 +262,7 @@ cycler
 ##             return(unique(c(url_list, url_log)))
 ##         })
 ##         stp <- Sys.time()
-##         if (difftime(stp, strt, units = c("secs")) > time.limit) 
+##         if (difftime(stp, strt, units = c("secs")) > time.limit)
 ##             break
 ##     }
 ##     return(url_list)
@@ -277,9 +279,9 @@ extract_txt
 ```
 
 ```
-## function (urls, merged = TRUE, add.queries = NULL, preproc.expr = NULL) 
+## function (urls, merged = TRUE, add.queries = NULL, preproc.expr = NULL)
 ## {
-##     if (is.list(urls)) 
+##     if (is.list(urls))
 ##         url <- unlist(urls)
 ##     sapply(urls, function(s.url) {
 ##         html <- tryCatch(withTimeout({
@@ -289,7 +291,7 @@ extract_txt
 ##         }, error = function(e) {
 ##             return(NA)
 ##         })
-##         if (is.na(html)) 
+##         if (is.na(html))
 ##             return(NA)
 ##         doc <- tryCatch(withTimeout({
 ##             htmlParse(html, asText = TRUE)
@@ -298,7 +300,7 @@ extract_txt
 ##         }, error = function(e) {
 ##             return(NA)
 ##         })
-##         if (is.na(doc)) 
+##         if (is.na(doc))
 ##             return(NA)
 ##         queries <- c(title = "//title", text = "//p", add.queries)
 ##         plain.text <- tryCatch(withTimeout({
@@ -308,10 +310,10 @@ extract_txt
 ##         }, error = function(e) {
 ##             return(NA)
 ##         })
-##         if (all(is.na(plain.text))) 
+##         if (all(is.na(plain.text)))
 ##             return(NA)
 ##         plain.text <- gsub("(\\{.*\\}(\\.)?)|(^\\.$)", "", plain.text)
-##         if (!is.null(preproc.expr)) 
+##         if (!is.null(preproc.expr))
 ##             plain.text <- plain.text[!grepl(preproc.expr, plain.text)]
 ##         if (isTRUE(merged)) {
 ##             return(paste(plain.text, collapse = "\n"))
@@ -350,29 +352,29 @@ clean_text
 ```
 
 ```
-## function (txt, raw = F, hard.filter = NULL, buzzwords = NULL, 
-##     slicing = T, slicing.keywords = NULL, scnd.step.slicing = 3, 
-##     scnd.step.threshold = 4, min.words = 3, min.avg.characters = 3, 
-##     max.buzzwords = 2, recover.fs = 50) 
+## function (txt, raw = F, hard.filter = NULL, buzzwords = NULL,
+##     slicing = T, slicing.keywords = NULL, scnd.step.slicing = 3,
+##     scnd.step.threshold = 4, min.words = 3, min.avg.characters = 3,
+##     max.buzzwords = 2, recover.fs = 50)
 ## {
-##     if (is.list(txt)) 
+##     if (is.list(txt))
 ##         txt <- unlist(txt, recursive = F)
 ##     if (length(txt) %in% c(0, 1)) {
 ##         return(NA)
 ##     }
-##     if (is.null(buzzwords)) 
+##     if (is.null(buzzwords))
 ##         buzzwords <- default.buzzwords
 ##     buzzwords <- paste0(c(buzzwords, default.buzzwords), collapse = "|")
-##     if (is.null(slicing.keywords)) 
+##     if (is.null(slicing.keywords))
 ##         slicing.keywords <- default.slicing.keywords
-##     slicing.keywords <- paste0(c(slicing.keywords, default.slicing.keywords), 
+##     slicing.keywords <- paste0(c(slicing.keywords, default.slicing.keywords),
 ##         collapse = "|")
 ##     txt <- iconv(enc2utf8(txt), "UTF-8", "ASCII")
-##     txt_splt <- sapply(txt, function(string) strsplit(string, 
+##     txt_splt <- sapply(txt, function(string) strsplit(string,
 ##         " "))
-##     txt <- tibble(txt = txt, n.words = lengths(txt_splt), nchar.words.mean = sapply(txt_splt, 
-##         function(x) mean(nchar(x), na.rm = T)), buzz.words = buzz_matches(unlist(txt), 
-##         buzzwords), n.buzzwords = lengths(sapply(strsplit(buzz.words, 
+##     txt <- tibble(txt = txt, n.words = lengths(txt_splt), nchar.words.mean = sapply(txt_splt,
+##         function(x) mean(nchar(x), na.rm = T)), buzz.words = buzz_matches(unlist(txt),
+##         buzzwords), n.buzzwords = lengths(sapply(strsplit(buzz.words,
 ##         ";"), function(x) if (any(is.na(x))) {
 ##         NULL
 ##     }
@@ -384,31 +386,31 @@ clean_text
 ##         return(txt)
 ##     }
 ##     else {
-##         if (isTRUE(slicing) & length(grep(slicing.keywords, txt$buzz.words)) > 
+##         if (isTRUE(slicing) & length(grep(slicing.keywords, txt$buzz.words)) >
 ##             0) {
 ##             if (any(table(txt$buzz.words, useNA = "no") > 1)) {
-##                 txt <- txt[as.integer(seq_len(max(which(grepl(slicing.keywords, 
+##                 txt <- txt[as.integer(seq_len(max(which(grepl(slicing.keywords,
 ##                   txt$buzz.words))) - 1)), ]
 ##             }
 ##             else {
-##                 txt <- txt[as.integer(seq_len(min(which(grepl(slicing.keywords, 
+##                 txt <- txt[as.integer(seq_len(min(which(grepl(slicing.keywords,
 ##                   txt$buzz.words))) - 1)), ]
 ##             }
 ##         }
-##         txt <- filter(txt, !(n.words < min.words | nchar.words.mean < 
+##         txt <- filter(txt, !(n.words < min.words | nchar.words.mean <
 ##             min.avg.characters | n.buzzwords >= max.buzzwords))
-##         if (!is.null(hard.filter)) 
-##             txt <- filter(txt, !grepl(paste0(hard.filter, collapse = "|"), 
+##         if (!is.null(hard.filter))
+##             txt <- filter(txt, !grepl(paste0(hard.filter, collapse = "|"),
 ##                 txt))
-##         if (isTRUE(slicing) & sum(txt$n.buzzwords[round(nrow(txt) - 
+##         if (isTRUE(slicing) & sum(txt$n.buzzwords[round(nrow(txt) -
 ##             nrow(txt)/scnd.step.slicing, 0):nrow(txt)]) > scnd.step.threshold) {
-##             temp <- txt[round(nrow(txt) - nrow(txt)/scnd.step.slicing, 
+##             temp <- txt[round(nrow(txt) - nrow(txt)/scnd.step.slicing,
 ##                 0):nrow(txt), ]
 ##             id <- temp$id[min(which(temp$n.buzzwords > 0))]
-##             txt <- txt[as.integer(seq_len(min(which(txt$id == 
+##             txt <- txt[as.integer(seq_len(min(which(txt$id ==
 ##                 id)) - 1)), ]
 ##         }
-##         txt <- txt_log[(txt_log$id %in% txt$id) | (txt_log$n.words >= 
+##         txt <- txt_log[(txt_log$id %in% txt$id) | (txt_log$n.words >=
 ##             recover.fs), ]
 ##         return(txt)
 ##     }
@@ -450,7 +452,7 @@ buzz_matches
 ```
 
 ```
-## function (char.list, buzzwords) 
+## function (char.list, buzzwords)
 ## {
 ##     matches <- stri_extract_all_regex(tolower(char.list), buzzwords)
 ##     matches <- sapply(matches, function(x) {

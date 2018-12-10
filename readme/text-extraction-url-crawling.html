@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -400,16 +401,16 @@ _ create Google Search URLs
 <h3><span class="header-section-number">2.1.1</span> Get search URLs</h3>
 <p>This function does nothing more than generate URLs to access the top n pages of Google hits for the respective search term, and the language.</p>
 <pre class="r"><code>get_search_url</code></pre>
-<pre><code>## function (search.term, language = &quot;de&quot;, domain = &quot;.ch&quot;, quotes = TRUE, 
-##     n.pages = 1) 
+<pre><code>## function (search.term, language = &quot;de&quot;, domain = &quot;.ch&quot;, quotes = TRUE,
+##     n.pages = 1)
 ## {
 ##     search.term &lt;- gsub(&quot; &quot;, &quot;%20&quot;, search.term)
-##     if (isTRUE(quotes)) 
+##     if (isTRUE(quotes))
 ##         search.term &lt;- paste(&quot;%22&quot;, search.term, &quot;%22&quot;, sep = &quot;&quot;)
-##     google.url &lt;- paste(&quot;http://www.google&quot;, domain, &quot;/search?&quot;, 
+##     google.url &lt;- paste(&quot;http://www.google&quot;, domain, &quot;/search?&quot;,
 ##         &quot;hl=&quot;, language, &quot;&amp;q=&quot;, search.term, sep = &quot;&quot;)
 ##     if (n.pages &gt; 1) {
-##         return(c(google.url, paste0(google.url, &quot;&amp;ei=q-W9W-2MBoTCwALs5aPwBg&amp;start=&quot;, 
+##         return(c(google.url, paste0(google.url, &quot;&amp;ei=q-W9W-2MBoTCwALs5aPwBg&amp;start=&quot;,
 ##             (1:(n.pages - 1)) * 10, &quot;&amp;sa=N&quot;)))
 ##     }
 ##     else {
@@ -421,21 +422,21 @@ _ create Google Search URLs
 <h3><span class="header-section-number">2.1.2</span> Get top n pages of hits</h3>
 <p>This function extracts all top links for the respective Google search, and either returns them in unabbreviated or stemmed form. Furthermore, it is possible to drop recursive links, i.e. links to Google image or Google maps results for the search term.</p>
 <pre class="r"><code>get_google_hits</code></pre>
-<pre><code>## function (google.url, raw = T, drop.recursives = F) 
+<pre><code>## function (google.url, raw = T, drop.recursives = F)
 ## {
-##     doc &lt;- getURL(URLencode(google.url), .opts = curlOptions(followlocation = TRUE, 
+##     doc &lt;- getURL(URLencode(google.url), .opts = curlOptions(followlocation = TRUE,
 ##         cookiefile = &quot;nosuchfile&quot;))
 ##     html &lt;- htmlTreeParse(doc, useInternalNodes = TRUE, error = function(...) {
 ##     })
 ##     nodes &lt;- getNodeSet(html, &quot;//h3[@class='r']//a&quot;)
 ##     raw.refs &lt;- sapply(nodes, function(x) x &lt;- xmlAttrs(x)[[&quot;href&quot;]])
-##     if (isTRUE(drop.recursives)) 
+##     if (isTRUE(drop.recursives))
 ##         raw.refs &lt;- raw.refs[!grepl(&quot;\\/search\\?q\\=&quot;, raw.refs)]
 ##     if (isTRUE(raw)) {
 ##         return(raw.refs)
 ##     }
 ##     else {
-##         clean.refs &lt;- gsub(&quot;(\\/url\\?q\\=)|(\\&amp;sa.*)&quot;, &quot;&quot;, raw.refs) %&gt;% 
+##         clean.refs &lt;- gsub(&quot;(\\/url\\?q\\=)|(\\&amp;sa.*)&quot;, &quot;&quot;, raw.refs) %&gt;%
 ##             sapply(., function(x) URLdecode(URLdecode(x)))
 ##         return(clean.refs)
 ##     }
@@ -446,9 +447,9 @@ _ create Google Search URLs
 <h2><span class="header-section-number">2.2</span> HTTP status checks</h2>
 <p>This function is definitely a bottleneck in the whole workflow. It’s essentially a simple wrapper that uses <code>httr</code>’s <code>http_error()</code>-function to check for dead links and returns a tibble with both the Boolean value and the URL. It contains a timeout-catcher to prevent getting stuck in http collisions. All dead links are dropped (see workflow scheme above).</p>
 <pre class="r"><code>check_status_code</code></pre>
-<pre><code>## function (hits) 
+<pre><code>## function (hits)
 ## {
-##     if (is.list(hits)) 
+##     if (is.list(hits))
 ##         hits &lt;- unlist(hits)
 ##     hits.bool &lt;- pbsapply(hits, function(x) {
 ##         res &lt;- tryCatch({
@@ -470,7 +471,7 @@ _ create Google Search URLs
 <h3><span class="header-section-number">2.3.1</span> Snowballing algorithm</h3>
 <p>The snowballing algorithm first extracts all <code>href</code> elements from the parsed connection (URL), and checks whether the URL-trunks of the newly scraped links are problematic (either doesn’t start with <code>http?(s)</code> or doesn’t end with <code>\.html</code>); if so, the URL is dropped. Otherwise the URL is further checked for user-specified keywords (regex-optimized). This can be done by matching the keywords on the URL (<code>outer</code> matching), or by matching the keywords on both <code>title</code> and <code>p</code> HTML-elements (<code>inner</code> matching). Links that don’t produce matches are dropped, all the others are returned.</p>
 <pre class="r"><code>snowballer</code></pre>
-<pre><code>## function (url, keywords = NULL, key.match = &quot;outer&quot;) 
+<pre><code>## function (url, keywords = NULL, key.match = &quot;outer&quot;)
 ## {
 ##     trunk &lt;- str_extract(url, &quot;^https?://[^/]+&quot;)
 ##     html &lt;- paste(suppressWarnings(tryCatch({
@@ -486,7 +487,7 @@ _ create Google Search URLs
 ##                 return(paste0(trunk, x))
 ##             }
 ##             else {
-##                 if (grepl(&quot;^#&quot;, x) | !grepl(&quot;(http?(s))|(\\.html)&quot;, 
+##                 if (grepl(&quot;^#&quot;, x) | !grepl(&quot;(http?(s))|(\\.html)&quot;,
 ##                   x)) {
 ##                   return(NA)
 ##                 }
@@ -495,7 +496,7 @@ _ create Google Search URLs
 ##                 }
 ##             }
 ##         }) %&gt;% unname %&gt;% na.omit
-##         if (!is.null(keywords) &amp; key.match == &quot;outer&quot;) 
+##         if (!is.null(keywords) &amp; key.match == &quot;outer&quot;)
 ##             links &lt;- links[grepl(keywords, tolower(links))]
 ##         if (!is.null(keywords) &amp; key.match == &quot;inner&quot;) {
 ##             log &lt;- sapply(links, function(x) {
@@ -523,7 +524,7 @@ _ create Google Search URLs
 <h3><span class="header-section-number">2.3.2</span> Cycler</h3>
 <p>The snowballing cycler is the driver that feeds all <em>new</em> and <em>unique</em> URLs to the snowballing algorithm and keeps a log file with with all URLs scraped in one iteration, i.e. stemming from the same root (single URL fed to the <em>cycler</em>). It includes a timeout parameter to prevent endless cycling.</p>
 <pre class="r"><code>cycler</code></pre>
-<pre><code>## function (start, time.limit, keywords, key.match = &quot;outer&quot;) 
+<pre><code>## function (start, time.limit, keywords, key.match = &quot;outer&quot;)
 ## {
 ##     url_log &lt;- NULL
 ##     url_list &lt;- start
@@ -543,7 +544,7 @@ _ create Google Search URLs
 ##             return(unique(c(url_list, url_log)))
 ##         })
 ##         stp &lt;- Sys.time()
-##         if (difftime(stp, strt, units = c(&quot;secs&quot;)) &gt; time.limit) 
+##         if (difftime(stp, strt, units = c(&quot;secs&quot;)) &gt; time.limit)
 ##             break
 ##     }
 ##     return(url_list)
@@ -555,9 +556,9 @@ _ create Google Search URLs
 <div id="text-extraction" class="section level3">
 <h3><span class="header-section-number">2.4.1</span> Text extraction</h3>
 <pre class="r"><code>extract_txt</code></pre>
-<pre><code>## function (urls, merged = TRUE, add.queries = NULL, preproc.expr = NULL) 
+<pre><code>## function (urls, merged = TRUE, add.queries = NULL, preproc.expr = NULL)
 ## {
-##     if (is.list(urls)) 
+##     if (is.list(urls))
 ##         url &lt;- unlist(urls)
 ##     sapply(urls, function(s.url) {
 ##         html &lt;- tryCatch(withTimeout({
@@ -567,7 +568,7 @@ _ create Google Search URLs
 ##         }, error = function(e) {
 ##             return(NA)
 ##         })
-##         if (is.na(html)) 
+##         if (is.na(html))
 ##             return(NA)
 ##         doc &lt;- tryCatch(withTimeout({
 ##             htmlParse(html, asText = TRUE)
@@ -576,7 +577,7 @@ _ create Google Search URLs
 ##         }, error = function(e) {
 ##             return(NA)
 ##         })
-##         if (is.na(doc)) 
+##         if (is.na(doc))
 ##             return(NA)
 ##         queries &lt;- c(title = &quot;//title&quot;, text = &quot;//p&quot;, add.queries)
 ##         plain.text &lt;- tryCatch(withTimeout({
@@ -586,10 +587,10 @@ _ create Google Search URLs
 ##         }, error = function(e) {
 ##             return(NA)
 ##         })
-##         if (all(is.na(plain.text))) 
+##         if (all(is.na(plain.text)))
 ##             return(NA)
 ##         plain.text &lt;- gsub(&quot;(\\{.*\\}(\\.)?)|(^\\.$)&quot;, &quot;&quot;, plain.text)
-##         if (!is.null(preproc.expr)) 
+##         if (!is.null(preproc.expr))
 ##             plain.text &lt;- plain.text[!grepl(preproc.expr, plain.text)]
 ##         if (isTRUE(merged)) {
 ##             return(paste(plain.text, collapse = &quot;\n&quot;))
@@ -619,29 +620,29 @@ _ create Google Search URLs
 # scnd.step.slicing:: last share of the document that will be used to compute the sum buzzwords (default: 3; meaning: last third of the document)
 # scnd.step.threshold:: max number of buzzwords allowed in scnd.step.slicing before proceeding to slice the data (default: 4)</code></pre>
 <pre class="r"><code>clean_text</code></pre>
-<pre><code>## function (txt, raw = F, hard.filter = NULL, buzzwords = NULL, 
-##     slicing = T, slicing.keywords = NULL, scnd.step.slicing = 3, 
-##     scnd.step.threshold = 4, min.words = 3, min.avg.characters = 3, 
-##     max.buzzwords = 2, recover.fs = 50) 
+<pre><code>## function (txt, raw = F, hard.filter = NULL, buzzwords = NULL,
+##     slicing = T, slicing.keywords = NULL, scnd.step.slicing = 3,
+##     scnd.step.threshold = 4, min.words = 3, min.avg.characters = 3,
+##     max.buzzwords = 2, recover.fs = 50)
 ## {
-##     if (is.list(txt)) 
+##     if (is.list(txt))
 ##         txt &lt;- unlist(txt, recursive = F)
 ##     if (length(txt) %in% c(0, 1)) {
 ##         return(NA)
 ##     }
-##     if (is.null(buzzwords)) 
+##     if (is.null(buzzwords))
 ##         buzzwords &lt;- default.buzzwords
 ##     buzzwords &lt;- paste0(c(buzzwords, default.buzzwords), collapse = &quot;|&quot;)
-##     if (is.null(slicing.keywords)) 
+##     if (is.null(slicing.keywords))
 ##         slicing.keywords &lt;- default.slicing.keywords
-##     slicing.keywords &lt;- paste0(c(slicing.keywords, default.slicing.keywords), 
+##     slicing.keywords &lt;- paste0(c(slicing.keywords, default.slicing.keywords),
 ##         collapse = &quot;|&quot;)
 ##     txt &lt;- iconv(enc2utf8(txt), &quot;UTF-8&quot;, &quot;ASCII&quot;)
-##     txt_splt &lt;- sapply(txt, function(string) strsplit(string, 
+##     txt_splt &lt;- sapply(txt, function(string) strsplit(string,
 ##         &quot; &quot;))
-##     txt &lt;- tibble(txt = txt, n.words = lengths(txt_splt), nchar.words.mean = sapply(txt_splt, 
-##         function(x) mean(nchar(x), na.rm = T)), buzz.words = buzz_matches(unlist(txt), 
-##         buzzwords), n.buzzwords = lengths(sapply(strsplit(buzz.words, 
+##     txt &lt;- tibble(txt = txt, n.words = lengths(txt_splt), nchar.words.mean = sapply(txt_splt,
+##         function(x) mean(nchar(x), na.rm = T)), buzz.words = buzz_matches(unlist(txt),
+##         buzzwords), n.buzzwords = lengths(sapply(strsplit(buzz.words,
 ##         &quot;;&quot;), function(x) if (any(is.na(x))) {
 ##         NULL
 ##     }
@@ -653,31 +654,31 @@ _ create Google Search URLs
 ##         return(txt)
 ##     }
 ##     else {
-##         if (isTRUE(slicing) &amp; length(grep(slicing.keywords, txt$buzz.words)) &gt; 
+##         if (isTRUE(slicing) &amp; length(grep(slicing.keywords, txt$buzz.words)) &gt;
 ##             0) {
 ##             if (any(table(txt$buzz.words, useNA = &quot;no&quot;) &gt; 1)) {
-##                 txt &lt;- txt[as.integer(seq_len(max(which(grepl(slicing.keywords, 
+##                 txt &lt;- txt[as.integer(seq_len(max(which(grepl(slicing.keywords,
 ##                   txt$buzz.words))) - 1)), ]
 ##             }
 ##             else {
-##                 txt &lt;- txt[as.integer(seq_len(min(which(grepl(slicing.keywords, 
+##                 txt &lt;- txt[as.integer(seq_len(min(which(grepl(slicing.keywords,
 ##                   txt$buzz.words))) - 1)), ]
 ##             }
 ##         }
-##         txt &lt;- filter(txt, !(n.words &lt; min.words | nchar.words.mean &lt; 
+##         txt &lt;- filter(txt, !(n.words &lt; min.words | nchar.words.mean &lt;
 ##             min.avg.characters | n.buzzwords &gt;= max.buzzwords))
-##         if (!is.null(hard.filter)) 
-##             txt &lt;- filter(txt, !grepl(paste0(hard.filter, collapse = &quot;|&quot;), 
+##         if (!is.null(hard.filter))
+##             txt &lt;- filter(txt, !grepl(paste0(hard.filter, collapse = &quot;|&quot;),
 ##                 txt))
-##         if (isTRUE(slicing) &amp; sum(txt$n.buzzwords[round(nrow(txt) - 
+##         if (isTRUE(slicing) &amp; sum(txt$n.buzzwords[round(nrow(txt) -
 ##             nrow(txt)/scnd.step.slicing, 0):nrow(txt)]) &gt; scnd.step.threshold) {
-##             temp &lt;- txt[round(nrow(txt) - nrow(txt)/scnd.step.slicing, 
+##             temp &lt;- txt[round(nrow(txt) - nrow(txt)/scnd.step.slicing,
 ##                 0):nrow(txt), ]
 ##             id &lt;- temp$id[min(which(temp$n.buzzwords &gt; 0))]
-##             txt &lt;- txt[as.integer(seq_len(min(which(txt$id == 
+##             txt &lt;- txt[as.integer(seq_len(min(which(txt$id ==
 ##                 id)) - 1)), ]
 ##         }
-##         txt &lt;- txt_log[(txt_log$id %in% txt$id) | (txt_log$n.words &gt;= 
+##         txt &lt;- txt_log[(txt_log$id %in% txt$id) | (txt_log$n.words &gt;=
 ##             recover.fs), ]
 ##         return(txt)
 ##     }
@@ -699,7 +700,7 @@ _ create Google Search URLs
         |_IF isTRUE(slicing) &amp; there are slicing keywords in the documents::
           |_IF a buzzword exists more than once:: select index of last occurence as slicing point
           |_ELSE select index of the occurence as slicing point
-        x .. [[SOFT FILTERING]]  
+        x .. [[SOFT FILTERING]]
         |_ remove all strings for which isTRUE(n.words&lt;min.words|nchar.words.mean&lt;min.avg.characters|n.buzzwords&gt;=max.buzzwords)
         x .. [[HARD FILTERING]]
         |_IF !is.null(hard.filer):: remove all strings for which isTRUE(grepl(paste0(hard.filter, collapse = '|'), ..))
@@ -707,7 +708,7 @@ _ create Google Search URLs
         |_IF isTRUE(slicing) &amp; the sum of all buzzwords in the user-defined tailing portion of the text (==scnd.step.slicing) exceeds the userdefined threshold (==scnd.step.threshold):: remove tail</code></pre>
 <p>Dependencies:</p>
 <pre class="r"><code>buzz_matches</code></pre>
-<pre><code>## function (char.list, buzzwords) 
+<pre><code>## function (char.list, buzzwords)
 ## {
 ##     matches &lt;- stri_extract_all_regex(tolower(char.list), buzzwords)
 ##     matches &lt;- sapply(matches, function(x) {
@@ -890,7 +891,7 @@ buzzwords &lt;- c('bild',
                '\\(c\\)',
                'channel',
                tolower(newspapers)) %&gt;%
-  gsub('\\.', '\\\\.', .)  
+  gsub('\\.', '\\\\.', .)
 
 # check for correct implementation of punctation
 grep('\\.', buzzwords, value=T)
