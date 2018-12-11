@@ -2,7 +2,7 @@
 title: "Google Search crawling, HTTP status checks, URL snowballing, text scraping, and document burning"
 author: "Lucien Baumgartner"
 date: "10/25/2018"
-redirect_from: "https://lucienbaumgartner.github.io/projects/2018/07/03/url-crawler.html"
+alias: /post/6301645915/how-i-keep-limited-pressing-running/index.html
 output:
   html_document:
     toc: true
