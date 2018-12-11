@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import pandas as pd
 import re
-
+# some random comment
 df = pd.read_csv('path/to/pdf/with/links')
 
 def scrape(page):
