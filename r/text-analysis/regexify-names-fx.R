@@ -13,17 +13,19 @@ regexify_names <- function(x){
   }else{
     if(grepl('\\(.*\\)', frac[length(frac)])){
       frac[length(frac)] <- gsub('([[:punct:]])', '(\\\\\\1)?', frac[length(frac)])
-      frac <- paste0(frac[length(frac)-1],
-                     paste0('((\\s)?(',frac[-c(1,(length(frac)-1))],')?(\\s)?)', collapse = '(\\s)?'), 
+      frac <- paste0(frac[2], # formerly: frac[length(frac)-1]
+                     paste0('((\\s)?(',frac[-c(1:2)],')?(\\s)?)', collapse = '(\\s)?'), 
+                     # formerly: paste0('((\\s)?(',frac[-c(1, length(frac))],')?(\\s)?)', collapse = '(\\s)?')
                      frac[1]
       )
     }else{
-      frac <- paste0(frac[length(frac)],
-                     paste0('((\\s)?(',frac[-c(1,length(frac))],')?(\\s)?)', collapse = '(\\s)?'), 
+      frac <- paste0(frac[2], # formerly: frac[length(frac)]
+                     paste0('((\\s)?(',frac[-c(1:2)],')?(\\s)?)', collapse = '(\\s)?'), 
+                     # paste0('((\\s)?(',frac[-c(1,length(frac))],')?(\\s)?)', collapse = '(\\s)?')
                      frac[1]
       )
     }
     
   }
-  return(gsub(' ', '\\\\s', frac))
+  return(paste0('(', gsub(' ', '\\\\s', frac), ')'))
 }
