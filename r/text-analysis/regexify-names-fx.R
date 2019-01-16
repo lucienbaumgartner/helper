@@ -1,4 +1,4 @@
-regexify_names <- function(x){
+regexify_names <- function(x, method='strict'){
   frac <- unlist(strsplit(x, '\\s'))
   if(any(grepl('(^(v|V)on$)|(^(d|D)(e(s)?|i)$)', frac))) frac <- c(paste(frac[1], frac[2]), frac[3:length(frac)])
   if(any(grepl('[a-z]\\-[A-Z]', frac))){
@@ -19,11 +19,30 @@ regexify_names <- function(x){
                      frac[1]
       )
     }else{
-      frac <- paste0(frac[2], # formerly: frac[length(frac)]
-                     paste0('((\\s)?(',frac[-c(1:2)],')?(\\s)?)', collapse = '(\\s)?'), 
-                     # paste0('((\\s)?(',frac[-c(1,length(frac))],')?(\\s)?)', collapse = '(\\s)?')
-                     frac[1]
-      )
+      if(method=='loose'){
+        frac.var <- paste0(
+          frac[length(frac)],
+          #paste0('((\\s)?(',frac[-c(1:2)],')?(\\s)?)', collapse = '(\\s)?'), 
+          paste0(
+            '(\\s', frac[1],
+            '|',
+            paste0('((\\s)?(',frac[-c(1,length(frac))],')(\\s)?)', collapse = '(\\s)?'),
+            ')'
+          )
+        )
+        frac <- paste0(frac[2], # formerly: frac[length(frac)]
+                       paste0('((\\s)?(',frac[-c(1:2)],')?(\\s)?)', collapse = '(\\s)?'), 
+                       # paste0('((\\s)?(',frac[-c(1,length(frac))],')?(\\s)?)', collapse = '(\\s)?')
+                       frac[1]
+        )
+        frac <- paste0('(', paste0('(', frac, ')|(', frac.var, ')'), ')')
+      }else{
+        frac <- paste0(frac[2], # formerly: frac[length(frac)]
+                       paste0('((\\s)?(',frac[-c(1:2)],')?(\\s)?)', collapse = '(\\s)?'), 
+                       # paste0('((\\s)?(',frac[-c(1,length(frac))],')?(\\s)?)', collapse = '(\\s)?')
+                       frac[1]
+        )
+      }
     }
     
   }
