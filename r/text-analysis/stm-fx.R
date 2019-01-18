@@ -1,4 +1,4 @@
-runSTM <- function(k, corpus, formula_prev, n_words, lang) { #formula_cont, 
+runSTM <- function(k, corpus, formula_prev, n_words, lang, outname.root) { #formula_cont, 
   #k <- as.numeric(unlist(strsplit(param, "-"))[1])
   #alpha <- as.numeric(unlist(strsplit(param, "-"))[2])
   #eta <- as.numeric(unlist(strsplit(param, "-"))[3])
@@ -8,8 +8,10 @@ runSTM <- function(k, corpus, formula_prev, n_words, lang) { #formula_cont,
              control = list(nits = 100, burnin = 25)) #, alpha = alpha, eta = eta))
   words <- labelTopics(STM, n = n_words)
   words <- as.data.frame(words[[1]])
-  outname <- paste0("./results/res/", k, ".txt") # ORDNER ANPASSEN
+  #outname <- paste0("./results/res/", k, ".txt") # ORDNER ANPASSEN
+  outname <- paste0(outname.root, k, ".txt") # ORDNER ANPASSEN
   write.table(words, outname, col.names = F, row.names = F, sep = "\t", quote = F)
+  return(STM)
 }
 
 #A James-Stein Estimator Shrinking to a Uniform Distribution

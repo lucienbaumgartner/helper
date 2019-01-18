@@ -1,11 +1,40 @@
+#################################################################
+# DeepL hack
+#################################################################
+# Content
+#################################################################
+# Dependencies
+# Language setting
+# Upload and download fx (== translation)
+#################################################################
+
+#################################################################
+# Dependencies
+#################################################################
+# global
+library(dplyr)
+library(rvest)
+library(stringr)
+library(stringi)
+library(textcat)
+library(pbapply)
+library(RSelenium)
+library(pbmcapply)
+library(reshape2)
+# local (needed for de facto execution)
+source('~/hub/helper/r/selenium-hacks/selenium-hacks-fx.R')
+
+#################################################################
+# Language setting
+#################################################################
 set_lang <- function(user.text, driver, language = 'dynamic'){
   browser <- driver
   if(identical(language, 'dynamic')){lang <- names(tail(table(textcat(user.text)), n=1))}else{lang=language}
-  
+
   setlang <- NULL
   start.t <- Sys.time()
   while(is.null(setlang)){
-    setlang <- tryCatch({browser$findElement(using='css', '.lmt__language_select__opener')}, 
+    setlang <- tryCatch({browser$findElement(using='css', '.lmt__language_select__opener')},
                         error = function(e){NULL})
     stop.t <- Sys.time()
     if(stop.t-start.t>10){
@@ -13,28 +42,28 @@ set_lang <- function(user.text, driver, language = 'dynamic'){
       break
     }
   }
-  
+
   if(is.null(setlang)){
     browser$close()
     browser$quit()
     stop()
   }
-  
+
   tryclick <- try(setlang$clickElement(), silent=T)
   while(class(tryclick)=='try-error'){
     tryclick <- try(setlang$clickElement(), silent=T)
   }
-  
+
   Sys.sleep(0.5)
   if(lang=='german') inplang <- browser$findElement(using='xpath', '//*[@id="dl_translator"]/div[1]/div[1]/div[1]/div/ul/li[3]')
   if(lang=='italian') inplang <- browser$findElement(using='xpath', '//*[@id="dl_translator"]/div[1]/div[1]/div[1]/div/ul/li[6]')
   if(lang=='french') inplang <- browser$findElement(using='xpath', '//*[@id="dl_translator"]/div[1]/div[1]/div[1]/div/ul/li[4]')
-  
+
   tryclick <- try(inplang$clickElement(), silent=T)
   if(class(tryclick)=='try-error'){
     tryclick <- try(inplang$clickElement(), silent=T)
   }
-  
+
   setting <- browser$findElement(using = 'xpath', '//*[@id="dl_translator"]/div[1]/div[1]/div[1]/div/label/strong')
   Sys.sleep(2)
   if(tolower(unlist(setting$getElementAttribute('innerHTML')))==lang){print('Language has correctly been set')}else{print('Problems with language setting')}
@@ -46,7 +75,7 @@ get_transl <- function(user.text, driver){
   input <- NULL
   start.t <- Sys.time()
   while(is.null(input)){
-    input <- tryCatch({browser$findElement(using='css', '.lmt__source_textarea')}, 
+    input <- tryCatch({browser$findElement(using='css', '.lmt__source_textarea')},
                       error = function(e){NULL})
     stop.t <- Sys.time()
     if(stop.t-start.t>10){
@@ -56,7 +85,7 @@ get_transl <- function(user.text, driver){
       break
     }
   }
-  
+
   tryclick <- try(input$clickElement(), silent=T)
   start.t <- Sys.time()
   while(class(tryclick) == "try-error"){
@@ -69,10 +98,10 @@ get_transl <- function(user.text, driver){
       break
     }
   }
-  
+
   input$sendKeysToElement(list(user.text))
   ## dynamic wait
-  # there are several dynamic elements that can be used 
+  # there are several dynamic elements that can be used
   busy <- browser$findElement(using = 'css', '.lmt__busy_indicator')
   while(grepl('active', unlist(busy$getElementAttribute('outerHTML')))){
     busy <- browser$findElement(using = 'css', '.lmt__busy_indicator')
@@ -81,5 +110,5 @@ get_transl <- function(user.text, driver){
   clsf <- trgt$getElementAttribute('innerHTML')
   input$clearElement()
   return(clsf)
-  
+
 }
