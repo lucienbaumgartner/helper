@@ -11,7 +11,8 @@ runSTM <- function(k, corpus, formula_prev, n_words, lang, outname.root) { #form
   #outname <- paste0("./results/res/", k, ".txt") # ORDNER ANPASSEN
   outname <- paste0(outname.root, k, ".txt") # ORDNER ANPASSEN
   write.table(words, outname, col.names = F, row.names = F, sep = "\t", quote = F)
-  return(STM)
+  save(STM, file=paste0(outname.root, 'stm_', k, '_topics.RDS'))
+  rm(STM)
 }
 
 #A James-Stein Estimator Shrinking to a Uniform Distribution
