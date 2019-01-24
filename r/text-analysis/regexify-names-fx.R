@@ -48,3 +48,39 @@ regexify_names <- function(x, method='strict'){
   }
   return(paste0('(', gsub(' ', '\\\\s', frac), ')'))
 }
+
+
+
+############## dev
+regexify_names2 <- function(firstN, lastN,  method='strict'){
+  if(grepl('[a-z](\\-|\\s)[A-Z]', lastN)){
+    if(grepl('[a-z](\\-)[A-Z]', lastN)){
+      lastN <- 
+        paste0(
+          '((', gsub('(.*[A-z]+\\-)', '(\\1)?', lastN),')|(', gsub('(\\-[A-z].*)', '(\\1)?', lastN),'))'
+        )
+    }
+    if(grepl('[a-z](\\s)[A-Z]', lastN)){
+      lastN <- 
+        paste0(
+          '((', gsub('(.*[A-z]+)\\s', '(\\1\\\\s)?', lastN),')|(', gsub('\\s([A-z].*)', '(\\\\s\\1)?', lastN),'))'
+        )
+    }
+    
+  }
+  if(length(unlist(strsplit(firstN, '\\s')))>1){
+    firstN <- unlist(strsplit(firstN, '\\s'))
+    firstN <-
+      paste0(
+        firstN[1],
+        paste0(
+          '((\\s)?(',firstN[2:length(firstN)],')?(\\s)?)', collapse = '(\\s)?'
+        )
+      )
+  }else{
+    firstN <- paste0(firstN, '\\s')
+  }
+  return(paste0(firstN, lastN))
+}
+
+#regexify_names2(firstN='Heiri', lastN='Müller Hans')
