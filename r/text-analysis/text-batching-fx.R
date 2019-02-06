@@ -13,7 +13,7 @@ batch_text <- function(usr.text, batchsize){
         gsub('\\C-x', '\\.\\.\\.', .) %>%
         gsub(., '', fit)}, error = function(e){e})
     
-    if(grepl('error|Error', container[[i]])){
+    if(grepl('\\berror\\b|\\bError\\b', container[[i]])){
       container <- 'batching error'
       break
     }
