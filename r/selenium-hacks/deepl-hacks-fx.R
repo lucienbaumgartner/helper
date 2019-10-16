@@ -25,8 +25,8 @@ library(RSelenium)
 library(pbmcapply)
 library(reshape2)
 # local (needed for de facto execution)
-source('~/hub/helper/r/selenium-hacks/selenium-hacks-fx.R')
-source('~/hub/helper/r/text-analysis/text-batching-fx.R')
+#source('~/hub/helper/r/selenium-hacks/selenium-hacks-fx.R')
+#source('~/hub/helper/r/text-analysis/text-batching-fx.R')
 
 #################################################################
 # Language setting
